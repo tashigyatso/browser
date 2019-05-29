@@ -3,12 +3,12 @@ A tool for checking browsers and system versions.
 
 ## Installation
 ```shell
-npm i browser.js -S
+npm i browserjs -S
 ```
 
 ## Usage
 ```javascript
-import Browser from 'browser.js'
+import Browser from 'browserjs'
 ```
 or
 

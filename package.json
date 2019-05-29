@@ -1,5 +1,5 @@
 {
-  "name": "browser.js",
+  "name": "browserjs",
   "version": "0.1.0",
   "description": "A tool for checking browsers and system versions.",
   "main": "dist/browser.js",
@@ -15,8 +15,7 @@
   "keywords": [
     "rollup",
     "browser",
-    "browserjs",
-    "browser.js"
+    "browserjs"
   ],
   "author": "Sorens",
   "license": "MIT",
