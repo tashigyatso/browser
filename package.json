@@ -20,6 +20,11 @@
   ],
   "author": "Sorens",
   "license": "MIT",
+  "homepage": "https://github.com/wy72yjf/browser",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wy72yjf?tab=repositories"
+  },
   "devDependencies": {
     "@babel/core": "7.4.5",
     "@babel/preset-env": "7.4.5",
