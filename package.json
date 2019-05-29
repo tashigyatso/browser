@@ -1,5 +1,5 @@
 {
-  "name": "browserjs",
+  "name": "browser-checking",
   "version": "0.1.0",
   "description": "A tool for checking browsers and system versions.",
   "main": "dist/browser.js",

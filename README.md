@@ -1,14 +1,14 @@
-# browser.js
+# browser-checking
 A tool for checking browsers and system versions.
 
 ## Installation
 ```shell
-npm i browserjs -S
+npm i browser-checking -S
 ```
 
 ## Usage
 ```javascript
-import Browser from 'browserjs'
+import Browser from 'browser-checking'
 ```
 or
 
