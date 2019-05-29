@@ -16,10 +16,6 @@ or
 通过script标签引入
 
 <script src="browser.js"></script>
-
-<script>
-  Browser.browser
-</script>
 ```
 
 ## Value

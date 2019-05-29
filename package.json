@@ -1,6 +1,6 @@
 {
   "name": "browser-checking",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A tool for checking browsers and system versions.",
   "main": "dist/browser.js",
   "files": [
@@ -15,14 +15,15 @@
   "keywords": [
     "rollup",
     "browser",
-    "browserjs"
+    "browser-checking",
+    "browser-check"
   ],
   "author": "Sorens",
   "license": "MIT",
   "homepage": "https://github.com/wy72yjf/browser",
   "repository": {
     "type": "git",
-    "url": "https://github.com/wy72yjf?tab=repositories"
+    "url": "https://github.com/wy72yjf/browser"
   },
   "devDependencies": {
     "@babel/core": "7.4.5",
