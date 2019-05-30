@@ -1,4 +1,5 @@
 import { OSSys, OSSysRevise } from './osConfig.js'
+import { Browsers, BrowsersRevise } from './browserConfig.js'
 const NAV = window.navigator
 // 按照惯例大写表示常量， 可这里我们希望UA可以实时更新
 let UA = ''
@@ -89,96 +90,21 @@ class BasicInfo {
   // 获取浏览器信息
   getBrowser() {
     let browser
-    if (UA.indexOf('chrome') > -1 || UA.indexOf('crios') > -1) {
-      browser = 'Chrome'
-    } else if (UA.indexOf('chromium') > -1) {
-      browser = 'Chromium'
-    } else if (UA.indexOf('msie') > -1 || UA.indexOf('trident') > -1) {
-      browser = 'IE'
-    } else if (UA.indexOf('firefox') > -1 || UA.indexOf('fxios') > -1) {
-      browser = 'Firefox'
-    } else if (UA.indexOf('focus') > -1) {
-      browser = 'Firefox Focus'
-    } else if (UA.indexOf('safari') > -1) {
-      browser = 'Safari'
-    } else if (UA.indexOf('opera') > -1 || UA.indexOf('opr') > -1) {
-      browser = 'Opera'
+    for (let i = 0, len = Browsers.length; i < len; i++) {
+      const item = Browsers[i]
+      if (~UA.indexOf(Browsers[i].toLowerCase())) {
+        browser = item
+        break
+      }
     }
-
-    if (UA.indexOf('edge') > -1) {
-      browser = 'Edge'
-    } else if (UA.indexOf('qihoobrowser') > -1 || UA.indexOf('qhbrowser') > -1) {
-      browser = '360浏览器(手机版)'
-    } else if (UA.indexOf('360se') > -1) {
-      browser = '360安全浏览器'
-    } else if (UA.indexOf('360ee') > -1) {
-      browser = '360极速浏览器'
-    } else if (UA.indexOf('sogou') > -1 || UA.indexOf('metasr') > -1) {
-      browser = '搜狗浏览器'
-    } else if (UA.indexOf('qq/') > -1) {
-      browser = 'QQ客户端'
-    } else if (UA.indexOf('qqbrowser') > -1) {
-      browser = 'QQ浏览器'
-    } else if (UA.indexOf('uc') > -1 || UA.indexOf('ubrowser') > -1) {
-      browser = 'UC浏览器'
-    } else if (UA.indexOf('lbbrowser') > -1) {
-      browser = '猎豹浏览器'
-    } else if (UA.indexOf('theworld') > -1) {
-      browser = '世界之窗浏览器'
-    } else if (UA.indexOf('baidu') > -1 || UA.indexOf('bidubrowser') > -1) {
-      browser = '百度浏览器'
-    } else if (UA.indexOf('2345explorer') > -1) {
-      browser = '2345浏览器'
-    } else if (UA.indexOf('maxthon') > -1) {
-      browser = '傲游浏览器'
-    } else if (UA.indexOf('quark') > -1) {
-      browser = '夸克浏览器'
-    } else if (UA.indexOf('miuibrowser') > -1) {
-      browser = '小米浏览器'
-    } else if (UA.indexOf('qiyu') > -1) {
-      browser = '旗鱼浏览器'
-    } else if (UA.indexOf('taobrowser') > -1) {
-      browser = '淘宝浏览器'
-    } else if (UA.indexOf('aliapp(tb') > -1) {
-      browser = '淘宝手机客户端'
-    } else if (UA.indexOf('aliapp(tm') > -1) {
-      browser = '天猫手机客户端'
-    } else if (UA.indexOf('aliapp(ap') > -1) {
-      browser = '支付宝手机客户端'
-    } else if (UA.indexOf('micromessenger') > -1) {
-      browser = '微信手机客户端'
-    } else if (UA.indexOf('weibo') > -1) {
-      browser = '微博手机客户端'
-    } else if (UA.indexOf('com.douban.frodo') > -1) {
-      browser = '豆瓣手机客户端'
-    } else if (UA.indexOf('snebuy-app') > -1) {
-      browser = '苏宁易购手机客户端'
-    } else if (UA.indexOf('iqiyiapp') > -1) {
-      browser = '爱奇艺手机客户端'
-    } else if (UA.indexOf('kindle') > -1 || UA.indexOf('silk/') > -1) {
-      browser = 'Kindle'
-    } else if (UA.indexOf('arora') > -1) {
-      browser = 'Arora'
-    } else if (UA.indexOf('vivaldi') > -1) {
-      browser = 'Vivaldi'
-    } else if (UA.indexOf('yabrowser') > -1) {
-      browser = 'Yandex'
-    } else if (UA.indexOf('lunascape') > -1) {
-      browser = 'Lunascape'
-    } else if (UA.indexOf('qupzilla') > -1) {
-      browser = 'QupZilla'
-    } else if (UA.indexOf('coc_coc_browser') > -1) {
-      browser = 'COCCOC'
-    } else if (UA.indexOf('iceape') > -1) {
-      browser = 'Iceape'
-    } else if (UA.indexOf('iceweasel') > -1) {
-      browser = 'Iceweasel'
-    } else if (UA.indexOf('konqueror') > -1) {
-      browser = 'Konqueror'
-    } else if (UA.indexOf('seamonkey') > -1) {
-      browser = 'SeaMonkey'
-    } else if (UA.indexOf('epiphany') > -1) {
-      browser = 'Epiphany'
+    if (!browser || browser === 'Chrome' || browser === 'Chromium') {
+      for (const key in BrowsersRevise) {
+        const item = BrowsersRevise[key]
+        if (~UA.indexOf(key)) {
+          browser = item
+          break
+        }
+      }
     }
     return browser
   }

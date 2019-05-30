@@ -48,6 +48,48 @@
     'hpwos': 'WebOS'
   };
 
+  // 由于有些浏览器是给予IE或者chrome内核的 我们尽量把这两个关键字放到最下边
+  // 使得浏览器自身的关键字优先级高 优先匹配
+  // 例如在mac系统下Chrome浏览器信息也带有Safari字段 ， 需要将Safari优先级低于chrome
+  var Browsers = ['Firefox', 'Opera', 'Edge', 'Kindle', 'Arora', 'Vivaldi', 'Yandex', 'Lunascape', 'QupZilla', 'Iceape', 'Iceweasel', 'Konqueror', 'SeaMonkey', 'Epiphany', 'Chrome', 'Chromium', 'Safari'];
+  var BrowsersRevise = {
+    'fxios': 'Firefox',
+    'focus': 'Firefox Focus',
+    'opr': 'Opera',
+    'qihoobrowser': '360浏览器(手机版)',
+    'qhbrowser': '360浏览器(手机版)',
+    '360se': '360安全浏览器',
+    '360ee': '360极速浏览器',
+    'sogou': '搜狗浏览器',
+    'metasr': '搜狗浏览器',
+    'qq/': 'QQ客户端',
+    'qqbrowser': 'QQ浏览器',
+    'uc': 'UC浏览器',
+    'ubrowser': 'UC浏览器',
+    'lbbrowser': '猎豹浏览器',
+    'theworld': '世界之窗浏览器',
+    'baidu': '百度浏览器',
+    'bidubrowser': '百度浏览器',
+    '2345explorer': '2345浏览器',
+    'maxthon': '傲游浏览器',
+    'quark': '夸克浏览器',
+    'miuibrowser': '小米浏览器',
+    'qiyu': '旗鱼浏览器',
+    'taobrowser': '淘宝浏览器',
+    'aliapp(tb': '淘宝手机客户端',
+    'aliapp(tm': '天猫手机客户端',
+    'aliapp(ap': '支付宝手机客户端',
+    'micromessenger': '微信手机客户端',
+    'weibo': '微博手机客户端',
+    'com.douban.frodo': '豆瓣手机客户端',
+    'snebuy-app': '苏宁易购手机客户端',
+    'iqiyiapp': '爱奇艺手机客户端',
+    'silk/': 'Kindle',
+    'crios': 'Chrome',
+    'trident': 'IE',
+    'msie': 'IE'
+  };
+
   var NAV = window.navigator; // 按照惯例大写表示常量， 可这里我们希望UA可以实时更新
 
   var UA = ''; // 检测结果
@@ -184,96 +226,24 @@
       value: function getBrowser() {
         var browser;
 
-        if (UA.indexOf('chrome') > -1 || UA.indexOf('crios') > -1) {
-          browser = 'Chrome';
-        } else if (UA.indexOf('chromium') > -1) {
-          browser = 'Chromium';
-        } else if (UA.indexOf('msie') > -1 || UA.indexOf('trident') > -1) {
-          browser = 'IE';
-        } else if (UA.indexOf('firefox') > -1 || UA.indexOf('fxios') > -1) {
-          browser = 'Firefox';
-        } else if (UA.indexOf('focus') > -1) {
-          browser = 'Firefox Focus';
-        } else if (UA.indexOf('safari') > -1) {
-          browser = 'Safari';
-        } else if (UA.indexOf('opera') > -1 || UA.indexOf('opr') > -1) {
-          browser = 'Opera';
+        for (var i = 0, len = Browsers.length; i < len; i++) {
+          var item = Browsers[i];
+
+          if (~UA.indexOf(Browsers[i].toLowerCase())) {
+            browser = item;
+            break;
+          }
         }
 
-        if (UA.indexOf('edge') > -1) {
-          browser = 'Edge';
-        } else if (UA.indexOf('qihoobrowser') > -1 || UA.indexOf('qhbrowser') > -1) {
-          browser = '360浏览器(手机版)';
-        } else if (UA.indexOf('360se') > -1) {
-          browser = '360安全浏览器';
-        } else if (UA.indexOf('360ee') > -1) {
-          browser = '360极速浏览器';
-        } else if (UA.indexOf('sogou') > -1 || UA.indexOf('metasr') > -1) {
-          browser = '搜狗浏览器';
-        } else if (UA.indexOf('qq/') > -1) {
-          browser = 'QQ客户端';
-        } else if (UA.indexOf('qqbrowser') > -1) {
-          browser = 'QQ浏览器';
-        } else if (UA.indexOf('uc') > -1 || UA.indexOf('ubrowser') > -1) {
-          browser = 'UC浏览器';
-        } else if (UA.indexOf('lbbrowser') > -1) {
-          browser = '猎豹浏览器';
-        } else if (UA.indexOf('theworld') > -1) {
-          browser = '世界之窗浏览器';
-        } else if (UA.indexOf('baidu') > -1 || UA.indexOf('bidubrowser') > -1) {
-          browser = '百度浏览器';
-        } else if (UA.indexOf('2345explorer') > -1) {
-          browser = '2345浏览器';
-        } else if (UA.indexOf('maxthon') > -1) {
-          browser = '傲游浏览器';
-        } else if (UA.indexOf('quark') > -1) {
-          browser = '夸克浏览器';
-        } else if (UA.indexOf('miuibrowser') > -1) {
-          browser = '小米浏览器';
-        } else if (UA.indexOf('qiyu') > -1) {
-          browser = '旗鱼浏览器';
-        } else if (UA.indexOf('taobrowser') > -1) {
-          browser = '淘宝浏览器';
-        } else if (UA.indexOf('aliapp(tb') > -1) {
-          browser = '淘宝手机客户端';
-        } else if (UA.indexOf('aliapp(tm') > -1) {
-          browser = '天猫手机客户端';
-        } else if (UA.indexOf('aliapp(ap') > -1) {
-          browser = '支付宝手机客户端';
-        } else if (UA.indexOf('micromessenger') > -1) {
-          browser = '微信手机客户端';
-        } else if (UA.indexOf('weibo') > -1) {
-          browser = '微博手机客户端';
-        } else if (UA.indexOf('com.douban.frodo') > -1) {
-          browser = '豆瓣手机客户端';
-        } else if (UA.indexOf('snebuy-app') > -1) {
-          browser = '苏宁易购手机客户端';
-        } else if (UA.indexOf('iqiyiapp') > -1) {
-          browser = '爱奇艺手机客户端';
-        } else if (UA.indexOf('kindle') > -1 || UA.indexOf('silk/') > -1) {
-          browser = 'Kindle';
-        } else if (UA.indexOf('arora') > -1) {
-          browser = 'Arora';
-        } else if (UA.indexOf('vivaldi') > -1) {
-          browser = 'Vivaldi';
-        } else if (UA.indexOf('yabrowser') > -1) {
-          browser = 'Yandex';
-        } else if (UA.indexOf('lunascape') > -1) {
-          browser = 'Lunascape';
-        } else if (UA.indexOf('qupzilla') > -1) {
-          browser = 'QupZilla';
-        } else if (UA.indexOf('coc_coc_browser') > -1) {
-          browser = 'COCCOC';
-        } else if (UA.indexOf('iceape') > -1) {
-          browser = 'Iceape';
-        } else if (UA.indexOf('iceweasel') > -1) {
-          browser = 'Iceweasel';
-        } else if (UA.indexOf('konqueror') > -1) {
-          browser = 'Konqueror';
-        } else if (UA.indexOf('seamonkey') > -1) {
-          browser = 'SeaMonkey';
-        } else if (UA.indexOf('epiphany') > -1) {
-          browser = 'Epiphany';
+        if (!browser || browser === 'Chrome' || browser === 'Chromium') {
+          for (var key in BrowsersRevise) {
+            var _item2 = BrowsersRevise[key];
+
+            if (~UA.indexOf(key)) {
+              browser = _item2;
+              break;
+            }
+          }
         }
 
         return browser;
@@ -561,4 +531,4 @@
   return result$1;
 
 }));
-/** Thu May 30 2019 18:45:13 GMT+0800 (CST) **/
+/** Thu May 30 2019 19:52:23 GMT+0800 (GMT+08:00) **/
