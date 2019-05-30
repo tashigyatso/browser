@@ -138,6 +138,9 @@
             item.kernel = this.getKernel();
             item.os = this.getOS();
             item.browser = this.getBrowser();
+            revise360(item);
+            item.osVersion = this.getOsVersion(item);
+            item.browserVersion = this.getBrowserVersion(item);
             result.push(item);
           }
         } catch (err) {
@@ -235,7 +238,7 @@
           }
         }
 
-        if (!browser || browser === 'Chrome' || browser === 'Chromium') {
+        if (!browser || browser === 'Chrome' || browser === 'Chromium' || browser === 'Safari') {
           for (var key in BrowsersRevise) {
             var _item2 = BrowsersRevise[key];
 
@@ -247,14 +250,30 @@
         }
 
         return browser;
+      } // 操作系统版本
+
+    }, {
+      key: "getOsVersion",
+      value: function getOsVersion(item) {
+        return osVersion[item.os]();
+      } // 浏览器版本
+
+    }, {
+      key: "getBrowserVersion",
+      value: function getBrowserVersion(item) {
+        return browserVersion[item.browser]();
+      }
+    }, {
+      key: "fianlRevise",
+      value: function fianlRevise(result) {
+        if (result.browser === 'Chrome' && parseInt(result.browserVersion) > 27 || result.browser === 'Opera' && parseInt(result.browserVersion) > 12 || result.browser === 'Yandex') {
+          result.kernel = 'Blink';
+        }
       }
     }]);
 
     return BasicInfo;
   }();
-
-  var basicInfo = new BasicInfo(NAV.userAgent.toLowerCase());
-  result = basicInfo.getResult()[0];
 
   function mime(option, value) {
     var mimeTypes = NAV.mimeTypes;
@@ -266,54 +285,56 @@
     }
 
     return false;
-  } // 360浏览器
-
-
-  var is360 = false;
-
-  if (window.chrome) {
-    var _chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'));
-
-    if (_chromeVision > 36 && window.showModalDialog) {
-      is360 = true;
-    } else if (_chromeVision > 45) {
-      is360 = mime('type', 'application/vnd.chromium.remoting-viewer');
-    }
   }
 
-  if (result.device !== 'Mobile' && is360) {
-    if (mime('type', 'application/gameplugin')) {
-      result.browser = '360安全浏览器';
-    } else {
-      result.browser = '360极速浏览器';
+  var revise360 = function revise360(result) {
+    var is360 = false;
+
+    if (window.chrome) {
+      var _chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'));
+
+      if (_chromeVision > 36 && window.showModalDialog) {
+        is360 = true;
+      } else if (_chromeVision > 45) {
+        is360 = mime('type', 'application/vnd.chromium.remoting-viewer');
+      }
     }
-  }
 
-  if (result.browser === 'IE' || result.browser === 'Edge') {
-    var screenTop = window.screenTop - window.screenY;
-
-    switch (screenTop) {
-      case 71: // 无收藏栏,贴边
-
-      case 74: // 无收藏栏,非贴边
-
-      case 99: // 有收藏栏,贴边
-
-      case 102:
-        // 有收藏栏,非贴边
-        result.browser = '360极速浏览器';
-        break;
-
-      case 75: // 无收藏栏,贴边
-
-      case 105: // 有收藏栏,贴边
-
-      case 104:
-        // 有收藏栏,非贴边
+    if (result.device !== 'Mobile' && is360) {
+      if (mime('type', 'application/gameplugin')) {
         result.browser = '360安全浏览器';
-        break;
+      } else {
+        result.browser = '360极速浏览器';
+      }
     }
-  } // 系统版本信息
+
+    if (result.browser === 'IE' || result.browser === 'Edge') {
+      var screenTop = window.screenTop - window.screenY;
+
+      switch (screenTop) {
+        case 71: // 无收藏栏,贴边
+
+        case 74: // 无收藏栏,非贴边
+
+        case 99: // 有收藏栏,贴边
+
+        case 102:
+          // 有收藏栏,非贴边
+          result.browser = '360极速浏览器';
+          break;
+
+        case 75: // 无收藏栏,贴边
+
+        case 105: // 有收藏栏,贴边
+
+        case 104:
+          // 有收藏栏,非贴边
+          result.browser = '360安全浏览器';
+          break;
+      }
+    }
+  }; // 360浏览器
+  // 系统版本信息
 
 
   var osVersion = {
@@ -349,9 +370,7 @@
     'Debian': function Debian() {
       return UA.replace(/^.*debian\/([\d.]+).*$/, '$1');
     }
-  }; // 操作系统版本
-
-  result.osVersion = osVersion[result.os](); // chrome内核版本
+  }; // chrome内核版本
 
   var chromeVision = function chromeVision(edition) {
     var chromeVision = UA.replace(/^.*chrome\/([\d]+).*$/, '$1');
@@ -517,18 +536,14 @@
     'Epiphany': function Epiphany() {
       return UA.replace(/^.*epiphany\/([\d.]+).*$/, '$1');
     }
-  }; // 浏览器版本
+  }; // const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
 
-  result.browserVersion = browserVersion[result.browser](); // 修正内核
-
-  if (result.browser === 'Chrome' && parseInt(result.browserVersion) > 27 || result.browser === 'Opera' && parseInt(result.browserVersion) > 12 || result.browser === 'Yandex') {
-    result.kernel = 'Blink';
-  }
-
+  var basicInfo = new BasicInfo([NAV.userAgent.toLowerCase(), 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.15'.toLowerCase(), 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17 SE 2.X MetaSr 1.0'.toLowerCase()]);
+  result = basicInfo.getResult()[1];
   window.Browser = result;
   var result$1 = result;
 
   return result$1;
 
 }));
-/** Thu May 30 2019 19:52:23 GMT+0800 (GMT+08:00) **/
+/** Thu May 30 2019 20:28:24 GMT+0800 (GMT+08:00) **/

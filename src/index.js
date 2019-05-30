@@ -31,6 +31,9 @@ class BasicInfo {
       item.kernel = this.getKernel()
       item.os = this.getOS()
       item.browser = this.getBrowser()
+      revise360(item)
+      item.osVersion = this.getOsVersion(item)
+      item.browserVersion = this.getBrowserVersion(item)
       result.push(item)
     }
     return result
@@ -97,7 +100,7 @@ class BasicInfo {
         break
       }
     }
-    if (!browser || browser === 'Chrome' || browser === 'Chromium') {
+    if (!browser || browser === 'Chrome' || browser === 'Chromium' || browser === 'Safari') {
       for (const key in BrowsersRevise) {
         const item = BrowsersRevise[key]
         if (~UA.indexOf(key)) {
@@ -108,10 +111,27 @@ class BasicInfo {
     }
     return browser
   }
-}
 
-const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
-result = basicInfo.getResult()[0]
+  // 操作系统版本
+  getOsVersion(item) {
+    return osVersion[item.os]()
+  }
+
+  // 浏览器版本
+  getBrowserVersion(item) {
+    return browserVersion[item.browser]()
+  }
+
+  fianlRevise(result) {
+    if (
+      (result.browser === 'Chrome' && parseInt(result.browserVersion) > 27) ||
+      (result.browser === 'Opera' && parseInt(result.browserVersion) > 12) ||
+      (result.browser === 'Yandex')
+    ) {
+      result.kernel = 'Blink'
+    }
+  }
+}
 
 function mime(option, value) {
   const mimeTypes = NAV.mimeTypes
@@ -123,41 +143,42 @@ function mime(option, value) {
   return false
 }
 
-// 360浏览器
-let is360 = false
-if (window.chrome) {
-  const chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'))
-  if (chromeVision > 36 && window.showModalDialog) {
-    is360 = true
-  } else if (chromeVision > 45) {
-    is360 = mime('type', 'application/vnd.chromium.remoting-viewer')
+const revise360 = (result) => {
+  let is360 = false
+  if (window.chrome) {
+    const chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'))
+    if (chromeVision > 36 && window.showModalDialog) {
+      is360 = true
+    } else if (chromeVision > 45) {
+      is360 = mime('type', 'application/vnd.chromium.remoting-viewer')
+    }
   }
-}
 
-if (result.device !== 'Mobile' && is360) {
-  if (mime('type', 'application/gameplugin')) {
-    result.browser = '360安全浏览器'
-  } else {
-    result.browser = '360极速浏览器'
-  }
-}
-
-if (result.browser === 'IE' || result.browser === 'Edge') {
-  const screenTop = window.screenTop - window.screenY
-  switch (screenTop) {
-    case 71: // 无收藏栏,贴边
-    case 74: // 无收藏栏,非贴边
-    case 99: // 有收藏栏,贴边
-    case 102: // 有收藏栏,非贴边
-      result.browser = '360极速浏览器'
-      break
-    case 75: // 无收藏栏,贴边
-    case 105: // 有收藏栏,贴边
-    case 104: // 有收藏栏,非贴边
+  if (result.device !== 'Mobile' && is360) {
+    if (mime('type', 'application/gameplugin')) {
       result.browser = '360安全浏览器'
-      break
+    } else {
+      result.browser = '360极速浏览器'
+    }
+  }
+  if (result.browser === 'IE' || result.browser === 'Edge') {
+    const screenTop = window.screenTop - window.screenY
+    switch (screenTop) {
+      case 71: // 无收藏栏,贴边
+      case 74: // 无收藏栏,非贴边
+      case 99: // 有收藏栏,贴边
+      case 102: // 有收藏栏,非贴边
+        result.browser = '360极速浏览器'
+        break
+      case 75: // 无收藏栏,贴边
+      case 105: // 有收藏栏,贴边
+      case 104: // 有收藏栏,非贴边
+        result.browser = '360安全浏览器'
+        break
+    }
   }
 }
+// 360浏览器
 
 // 系统版本信息
 const osVersion = {
@@ -194,9 +215,6 @@ const osVersion = {
     return UA.replace(/^.*debian\/([\d.]+).*$/, '$1')
   }
 }
-
-// 操作系统版本
-result.osVersion = osVersion[result.os]()
 
 // chrome内核版本
 const chromeVision = (edition) => {
@@ -365,17 +383,14 @@ const browserVersion = {
   }
 }
 
-// 浏览器版本
-result.browserVersion = browserVersion[result.browser]()
+const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
+// the test
+// const basicInfo = new BasicInfo([NAV.userAgent.toLowerCase(),
+//   'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.15'.toLowerCase(),
+//   'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17 SE 2.X MetaSr 1.0'.toLowerCase()
+// ])
 
-// 修正内核
-if (
-  (result.browser === 'Chrome' && parseInt(result.browserVersion) > 27) ||
-  (result.browser === 'Opera' && parseInt(result.browserVersion) > 12) ||
-  (result.browser === 'Yandex')
-) {
-  result.kernel = 'Blink'
-}
+result = basicInfo.getResult()[0]
 
 window.Browser = result
 
