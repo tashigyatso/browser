@@ -1,8 +1,13 @@
+import {
+  OSSys,
+  OSSysRevise
+} from './config.js'
 const NAV = window.navigator
-const UA = NAV.userAgent.toLowerCase()
+// 按照惯例大写表示常量， 可这里我们希望UA可以实时更新
+let UA = ''
 
 // 检测结果
-const result = {
+let result = {
   browser: '', // 浏览器
   browserVersion: '', // 浏览器版本
   os: '', // 操作系统
@@ -13,6 +18,27 @@ const result = {
 
 // 基本信息
 class BasicInfo {
+  // 参数可以是字符串或者数组
+  constructor(useAgent) {
+    this.useAgent = typeof useAgent === 'string' ? [useAgent] : useAgent
+    this.result = null
+    this.curUse = {}
+  }
+
+  getResult() {
+    const result = []
+    this.useAgent.forEach(element => {
+      const item = {}
+      UA = element
+      item.device = this.getDevice()
+      item.kernel = this.getKernel()
+      item.os = this.getOS()
+      item.browser = this.getBrowser()
+      result.push(item)
+    })
+    return result
+  }
+
   // 获取设备信息
   getDevice() {
     let device
@@ -44,35 +70,23 @@ class BasicInfo {
   // 获取操作系统
   getOS() {
     let os
-    if (UA.indexOf('windows') > -1) {
-      os = 'Windows'
-    } else if (UA.indexOf('linux') > -1 || UA.indexOf('x11') > -1) {
-      os = 'Linux'
-    } else if (UA.indexOf('macintosh') > -1) {
-      os = 'Mac OS'
-    } else if (UA.indexOf('android') > -1 || UA.indexOf('adr') > -1) {
-      os = 'Android'
-    } else if (UA.indexOf('like mac os x') > -1) {
-      os = 'iOS'
-    } else if (UA.indexOf('iemobile') > -1 || UA.indexOf('windows phone') > -1) {
-      os = 'Windows Phone'
-    } else if (UA.indexOf('ubuntu') > -1) {
-      os = 'Ubuntu'
-    } else if (UA.indexOf('freebsd') > -1) {
-      os = 'FreeBSD'
-    } else if (UA.indexOf('debian') > -1) {
-      os = 'Debian'
-    } else if (UA.indexOf('blackberry') > -1 || UA.indexOf('rim') > -1) {
-      os = 'BlackBerry'
-    } else if (UA.indexOf('meego') > -1) {
-      os = 'MeeGo'
-    } else if (UA.indexOf('symbian') > -1) {
-      os = 'Symbian'
-    } else if (UA.indexOf('cros') > -1) {
-      os = 'Chrome OS'
-    } else if (UA.indexOf('hpwos') > -1) {
-      os = 'WebOS'
+    for (let i = 0, len = OSSys.length; i < len; i++) {
+      const item = OSSys[i]
+      if (~UA.indexOf(OSSys[i].toLowerCase())) {
+        os = item
+        break
+      }
     }
+    if (!os) {
+      for (const key in OSSysRevise) {
+        const item = OSSysRevise[key]
+        if (~UA.indexOf(key)) {
+          os = item
+          break
+        }
+      }
+    }
+    // 针对windows phone可二次修正
     return os
   }
 
@@ -174,11 +188,13 @@ class BasicInfo {
   }
 }
 
-const basicInfo = new BasicInfo()
-result.device = basicInfo.getDevice()
-result.kernel = basicInfo.getKernel()
-result.os = basicInfo.getOS()
-result.browser = basicInfo.getBrowser()
+const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
+result = basicInfo.getResult()[0]
+// const basicInfo = new BasicInfo()
+// result.device = basicInfo.getDevice()
+// result.kernel = basicInfo.getKernel()
+// result.os = basicInfo.getOS()
+// result.browser = basicInfo.getBrowser()
 
 function mime(option, value) {
   const mimeTypes = NAV.mimeTypes
@@ -447,3 +463,4 @@ if (
 window.Browser = result
 
 export default result
+
