@@ -190,11 +190,6 @@ class BasicInfo {
 
 const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
 result = basicInfo.getResult()[0]
-// const basicInfo = new BasicInfo()
-// result.device = basicInfo.getDevice()
-// result.kernel = basicInfo.getKernel()
-// result.os = basicInfo.getOS()
-// result.browser = basicInfo.getBrowser()
 
 function mime(option, value) {
   const mimeTypes = NAV.mimeTypes
