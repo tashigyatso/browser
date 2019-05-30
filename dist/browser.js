@@ -75,26 +75,44 @@
     function BasicInfo(useAgent) {
       classCallCheck(this, BasicInfo);
 
-      this.useAgent = typeof useAgent === 'string' ? [useAgent] : useAgent;
-      this.result = null;
-      this.curUse = {};
-    }
+      this.useAgents = typeof useAgent === 'string' ? [useAgent] : useAgent;
+    } // 处理结果
+
 
     createClass(BasicInfo, [{
       key: "getResult",
       value: function getResult() {
-        var _this = this;
-
         var result = [];
-        this.useAgent.forEach(function (element) {
-          var item = {};
-          UA = element;
-          item.device = _this.getDevice();
-          item.kernel = _this.getKernel();
-          item.os = _this.getOS();
-          item.browser = _this.getBrowser();
-          result.push(item);
-        });
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = this.useAgents[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var agent = _step.value;
+            var item = {};
+            UA = agent;
+            item.device = this.getDevice();
+            item.kernel = this.getKernel();
+            item.os = this.getOS();
+            item.browser = this.getBrowser();
+            result.push(item);
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+              _iterator["return"]();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
         return result;
       } // 获取设备信息
 
@@ -266,11 +284,7 @@
   }();
 
   var basicInfo = new BasicInfo(NAV.userAgent.toLowerCase());
-  result = basicInfo.getResult()[0]; // const basicInfo = new BasicInfo()
-  // result.device = basicInfo.getDevice()
-  // result.kernel = basicInfo.getKernel()
-  // result.os = basicInfo.getOS()
-  // result.browser = basicInfo.getBrowser()
+  result = basicInfo.getResult()[0];
 
   function mime(option, value) {
     var mimeTypes = NAV.mimeTypes;
@@ -547,4 +561,4 @@
   return result$1;
 
 }));
-/** Thu May 30 2019 15:36:52 GMT+0800 (GMT+08:00) **/
+/** Thu May 30 2019 18:45:13 GMT+0800 (CST) **/

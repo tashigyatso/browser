@@ -1,7 +1,4 @@
-import {
-  OSSys,
-  OSSysRevise
-} from './config.js'
+import { OSSys, OSSysRevise } from './osConfig.js'
 const NAV = window.navigator
 // 按照惯例大写表示常量， 可这里我们希望UA可以实时更新
 let UA = ''
@@ -20,22 +17,21 @@ let result = {
 class BasicInfo {
   // 参数可以是字符串或者数组
   constructor(useAgent) {
-    this.useAgent = typeof useAgent === 'string' ? [useAgent] : useAgent
-    this.result = null
-    this.curUse = {}
+    this.useAgents = typeof useAgent === 'string' ? [useAgent] : useAgent
   }
 
+  // 处理结果
   getResult() {
     const result = []
-    this.useAgent.forEach(element => {
+    for (const agent of this.useAgents) {
       const item = {}
-      UA = element
+      UA = agent
       item.device = this.getDevice()
       item.kernel = this.getKernel()
       item.os = this.getOS()
       item.browser = this.getBrowser()
       result.push(item)
-    })
+    }
     return result
   }
 
