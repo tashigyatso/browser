@@ -1,18 +1,9 @@
-import { OSSys, OSSysRevise } from './osConfig.js'
-import { Browsers, BrowsersRevise } from './browserConfig.js'
+import { OSSys, OSSysRevise } from './os.js'
+import { Browsers, BrowsersRevise } from './browser.js'
+
 const NAV = window.navigator
 // 按照惯例大写表示常量， 可这里我们希望UA可以实时更新
 let UA = ''
-
-// 检测结果
-let result = {
-  browser: '', // 浏览器
-  browserVersion: '', // 浏览器版本
-  os: '', // 操作系统
-  osVersion: '', // 操作系统版本
-  kernel: '', // 内核
-  device: '' // 设备
-}
 
 // 基本信息
 class BasicInfo {
@@ -27,13 +18,15 @@ class BasicInfo {
     for (const agent of this.useAgents) {
       const item = {}
       UA = agent
-      item.device = this.getDevice()
-      item.kernel = this.getKernel()
-      item.os = this.getOS()
-      item.browser = this.getBrowser()
+      item.device = this.getDevice() // 设备
+      item.kernel = this.getKernel() // 内核
+      item.os = this.getOS() // 操作系统
+      item.browser = this.getBrowser() // 浏览器
+      item.osVersion = this.getOsVersion(item) // 操作系统版本
+      item.browserVersion = this.getBrowserVersion(item) // 浏览器版本
+
       revise360(item)
-      item.osVersion = this.getOsVersion(item)
-      item.browserVersion = this.getBrowserVersion(item)
+      reviseKernel(item)
       result.push(item)
     }
     return result
@@ -121,18 +114,9 @@ class BasicInfo {
   getBrowserVersion(item) {
     return browserVersion[item.browser]()
   }
-
-  fianlRevise(result) {
-    if (
-      (result.browser === 'Chrome' && parseInt(result.browserVersion) > 27) ||
-      (result.browser === 'Opera' && parseInt(result.browserVersion) > 12) ||
-      (result.browser === 'Yandex')
-    ) {
-      result.kernel = 'Blink'
-    }
-  }
 }
 
+// 检测type
 function mime(option, value) {
   const mimeTypes = NAV.mimeTypes
   for (const mt in mimeTypes) {
@@ -143,7 +127,8 @@ function mime(option, value) {
   return false
 }
 
-const revise360 = (result) => {
+// 修正360浏览器
+function revise360(item) {
   let is360 = false
   if (window.chrome) {
     const chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'))
@@ -154,31 +139,47 @@ const revise360 = (result) => {
     }
   }
 
-  if (result.device !== 'Mobile' && is360) {
+  if (item.device !== 'Mobile' && is360) {
     if (mime('type', 'application/gameplugin')) {
-      result.browser = '360安全浏览器'
+      item.browser = '360安全浏览器'
     } else {
-      result.browser = '360极速浏览器'
+      item.browser = '360极速浏览器'
     }
   }
-  if (result.browser === 'IE' || result.browser === 'Edge') {
+  if (item.browser === 'IE' || item.browser === 'Edge') {
     const screenTop = window.screenTop - window.screenY
     switch (screenTop) {
       case 71: // 无收藏栏,贴边
       case 74: // 无收藏栏,非贴边
       case 99: // 有收藏栏,贴边
       case 102: // 有收藏栏,非贴边
-        result.browser = '360极速浏览器'
+        item.browser = '360极速浏览器'
         break
       case 75: // 无收藏栏,贴边
       case 105: // 有收藏栏,贴边
       case 104: // 有收藏栏,非贴边
-        result.browser = '360安全浏览器'
+        item.browser = '360安全浏览器'
         break
     }
   }
 }
-// 360浏览器
+
+// 修正内核
+function reviseKernel(item) {
+  if (
+    (item.browser === 'Chrome' && parseInt(item.browserVersion) > 27) ||
+    (item.browser === 'Opera' && parseInt(item.browserVersion) > 12) ||
+    (item.browser === 'Yandex')
+  ) {
+    item.kernel = 'Blink'
+  }
+}
+
+// 获取chrome内核版本
+function chromeVision(edition) {
+  const chromeVision = UA.replace(/^.*chrome\/([\d]+).*$/, '$1')
+  return edition[chromeVision] || ''
+}
 
 // 系统版本信息
 const osVersion = {
@@ -214,12 +215,6 @@ const osVersion = {
   'Debian'() {
     return UA.replace(/^.*debian\/([\d.]+).*$/, '$1')
   }
-}
-
-// chrome内核版本
-const chromeVision = (edition) => {
-  const chromeVision = UA.replace(/^.*chrome\/([\d]+).*$/, '$1')
-  return edition[chromeVision] || ''
 }
 
 // 浏览器版本信息
@@ -391,9 +386,9 @@ const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
 // ])
 // result = basicInfo.getResult()[2]
 
-result = basicInfo.getResult()[0]
+const Result = basicInfo.getResult()[0]
 
-window.Browser = result
+window.Browser = Result
 
-export default result
+export default Result
 

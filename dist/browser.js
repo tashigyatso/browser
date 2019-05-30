@@ -51,7 +51,7 @@
   // 由于有些浏览器是给予IE或者chrome内核的 我们尽量把这两个关键字放到最下边
   // 使得浏览器自身的关键字优先级高 优先匹配
   // 例如在mac系统下Chrome浏览器信息也带有Safari字段 ， 需要将Safari优先级低于chrome
-  var Browsers = ['Firefox', 'Opera', 'Edge', 'Kindle', 'Arora', 'Vivaldi', 'Yandex', 'Lunascape', 'QupZilla', 'Iceape', 'Iceweasel', 'Konqueror', 'SeaMonkey', 'Epiphany', 'Chrome', 'Chromium', 'Safari'];
+  var Browsers = ['Arora', 'Edge', 'Epiphany', 'Firefox', 'Iceape', 'Iceweasel', 'Kindle', 'Konqueror', 'Lunascape', 'Opera', 'QupZilla', 'SeaMonkey', 'Vivaldi', 'Chrome', 'Chromium', 'Safari'];
   var BrowsersRevise = {
     'fxios': 'Firefox',
     'focus': 'Firefox Focus',
@@ -85,6 +85,7 @@
     'snebuy-app': '苏宁易购手机客户端',
     'iqiyiapp': '爱奇艺手机客户端',
     'silk/': 'Kindle',
+    'yabrowser': 'Yandex',
     'crios': 'Chrome',
     'trident': 'IE',
     'msie': 'IE'
@@ -92,23 +93,7 @@
 
   var NAV = window.navigator; // 按照惯例大写表示常量， 可这里我们希望UA可以实时更新
 
-  var UA = ''; // 检测结果
-
-  var result = {
-    browser: '',
-    // 浏览器
-    browserVersion: '',
-    // 浏览器版本
-    os: '',
-    // 操作系统
-    osVersion: '',
-    // 操作系统版本
-    kernel: '',
-    // 内核
-    device: '' // 设备
-    // 基本信息
-
-  };
+  var UA = ''; // 基本信息
 
   var BasicInfo =
   /*#__PURE__*/
@@ -134,13 +119,20 @@
             var agent = _step.value;
             var item = {};
             UA = agent;
-            item.device = this.getDevice();
-            item.kernel = this.getKernel();
-            item.os = this.getOS();
-            item.browser = this.getBrowser();
+            item.device = this.getDevice(); // 设备
+
+            item.kernel = this.getKernel(); // 内核
+
+            item.os = this.getOS(); // 操作系统
+
+            item.browser = this.getBrowser(); // 浏览器
+
+            item.osVersion = this.getOsVersion(item); // 操作系统版本
+
+            item.browserVersion = this.getBrowserVersion(item); // 浏览器版本
+
             revise360(item);
-            item.osVersion = this.getOsVersion(item);
-            item.browserVersion = this.getBrowserVersion(item);
+            reviseKernel(item);
             result.push(item);
           }
         } catch (err) {
@@ -263,17 +255,11 @@
       value: function getBrowserVersion(item) {
         return browserVersion[item.browser]();
       }
-    }, {
-      key: "fianlRevise",
-      value: function fianlRevise(result) {
-        if (result.browser === 'Chrome' && parseInt(result.browserVersion) > 27 || result.browser === 'Opera' && parseInt(result.browserVersion) > 12 || result.browser === 'Yandex') {
-          result.kernel = 'Blink';
-        }
-      }
     }]);
 
     return BasicInfo;
-  }();
+  }(); // 检测type
+
 
   function mime(option, value) {
     var mimeTypes = NAV.mimeTypes;
@@ -285,9 +271,10 @@
     }
 
     return false;
-  }
+  } // 修正360浏览器
 
-  var revise360 = function revise360(result) {
+
+  function revise360(item) {
     var is360 = false;
 
     if (window.chrome) {
@@ -300,15 +287,15 @@
       }
     }
 
-    if (result.device !== 'Mobile' && is360) {
+    if (item.device !== 'Mobile' && is360) {
       if (mime('type', 'application/gameplugin')) {
-        result.browser = '360安全浏览器';
+        item.browser = '360安全浏览器';
       } else {
-        result.browser = '360极速浏览器';
+        item.browser = '360极速浏览器';
       }
     }
 
-    if (result.browser === 'IE' || result.browser === 'Edge') {
+    if (item.browser === 'IE' || item.browser === 'Edge') {
       var screenTop = window.screenTop - window.screenY;
 
       switch (screenTop) {
@@ -320,7 +307,7 @@
 
         case 102:
           // 有收藏栏,非贴边
-          result.browser = '360极速浏览器';
+          item.browser = '360极速浏览器';
           break;
 
         case 75: // 无收藏栏,贴边
@@ -329,12 +316,24 @@
 
         case 104:
           // 有收藏栏,非贴边
-          result.browser = '360安全浏览器';
+          item.browser = '360安全浏览器';
           break;
       }
     }
-  }; // 360浏览器
-  // 系统版本信息
+  } // 修正内核
+
+
+  function reviseKernel(item) {
+    if (item.browser === 'Chrome' && parseInt(item.browserVersion) > 27 || item.browser === 'Opera' && parseInt(item.browserVersion) > 12 || item.browser === 'Yandex') {
+      item.kernel = 'Blink';
+    }
+  } // 获取chrome内核版本
+
+
+  function chromeVision(edition) {
+    var chromeVision = UA.replace(/^.*chrome\/([\d]+).*$/, '$1');
+    return edition[chromeVision] || '';
+  } // 系统版本信息
 
 
   var osVersion = {
@@ -370,13 +369,7 @@
     'Debian': function Debian() {
       return UA.replace(/^.*debian\/([\d.]+).*$/, '$1');
     }
-  }; // chrome内核版本
-
-  var chromeVision = function chromeVision(edition) {
-    var chromeVision = UA.replace(/^.*chrome\/([\d]+).*$/, '$1');
-    return edition[chromeVision] || '';
   }; // 浏览器版本信息
-
 
   var browserVersion = {
     'Chrome': function Chrome() {
@@ -544,11 +537,10 @@
   // ])
   // result = basicInfo.getResult()[2]
 
-  result = basicInfo.getResult()[0];
-  window.Browser = result;
-  var result$1 = result;
+  var Result = basicInfo.getResult()[0];
+  window.Browser = Result;
 
-  return result$1;
+  return Result;
 
 }));
-/** Thu May 30 2019 20:31:29 GMT+0800 (GMT+08:00) **/
+/** Fri May 31 2019 00:04:45 GMT+0800 (CST) **/

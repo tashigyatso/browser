@@ -2,20 +2,19 @@
 // 使得浏览器自身的关键字优先级高 优先匹配
 // 例如在mac系统下Chrome浏览器信息也带有Safari字段 ， 需要将Safari优先级低于chrome
 export const Browsers = [
-  'Firefox',
-  'Opera',
-  'Edge',
-  'Kindle',
   'Arora',
-  'Vivaldi',
-  'Yandex',
-  'Lunascape',
-  'QupZilla',
+  'Edge',
+  'Epiphany',
+  'Firefox',
   'Iceape',
   'Iceweasel',
+  'Kindle',
   'Konqueror',
+  'Lunascape',
+  'Opera',
+  'QupZilla',
   'SeaMonkey',
-  'Epiphany',
+  'Vivaldi',
   'Chrome',
   'Chromium',
   'Safari'
@@ -54,6 +53,7 @@ export const BrowsersRevise = {
   'snebuy-app': '苏宁易购手机客户端',
   'iqiyiapp': '爱奇艺手机客户端',
   'silk/': 'Kindle',
+  'yabrowser': 'Yandex',
   'crios': 'Chrome',
   'trident': 'IE',
   'msie': 'IE'
