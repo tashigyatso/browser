@@ -536,14 +536,19 @@
     'Epiphany': function Epiphany() {
       return UA.replace(/^.*epiphany\/([\d.]+).*$/, '$1');
     }
-  }; // const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
+  };
+  var basicInfo = new BasicInfo(NAV.userAgent.toLowerCase()); // the test
+  // const basicInfo = new BasicInfo([NAV.userAgent.toLowerCase(),
+  //   'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.15'.toLowerCase(),
+  //   'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17 SE 2.X MetaSr 1.0'.toLowerCase()
+  // ])
+  // result = basicInfo.getResult()[2]
 
-  var basicInfo = new BasicInfo([NAV.userAgent.toLowerCase(), 'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.15'.toLowerCase(), 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17 SE 2.X MetaSr 1.0'.toLowerCase()]);
-  result = basicInfo.getResult()[1];
+  result = basicInfo.getResult()[0];
   window.Browser = result;
   var result$1 = result;
 
   return result$1;
 
 }));
-/** Thu May 30 2019 20:28:24 GMT+0800 (GMT+08:00) **/
+/** Thu May 30 2019 20:31:29 GMT+0800 (GMT+08:00) **/
