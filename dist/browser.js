@@ -110,44 +110,25 @@
       key: "getResult",
       value: function getResult() {
         var result = [];
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
 
-        try {
-          for (var _iterator = this.useAgents[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var agent = _step.value;
-            var item = {};
-            UA = agent;
-            item.device = this.getDevice(); // 设备
+        for (var i = 0, len = this.useAgents.length; i < len; i++) {
+          var item = {};
+          UA = this.useAgents[i];
+          item.device = this.getDevice(); // 设备
 
-            item.kernel = this.getKernel(); // 内核
+          item.kernel = this.getKernel(); // 内核
 
-            item.os = this.getOS(); // 操作系统
+          item.os = this.getOS(); // 操作系统
 
-            item.browser = this.getBrowser(); // 浏览器
+          item.browser = this.getBrowser(); // 浏览器
 
-            item.osVersion = this.getOsVersion(item); // 操作系统版本
+          revise360(item);
+          item.osVersion = this.getOsVersion(item); // 操作系统版本
 
-            item.browserVersion = this.getBrowserVersion(item); // 浏览器版本
+          item.browserVersion = this.getBrowserVersion(item); // 浏览器版本
 
-            revise360(item);
-            reviseKernel(item);
-            result.push(item);
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-              _iterator["return"]();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
+          reviseKernel(item);
+          result.push(item);
         }
 
         return result;
@@ -271,23 +252,29 @@
     }
 
     return false;
+  }
+
+  function is360ByUserActivationProperty() {
+    if (NAV.userActivation) {
+      return false; // chrome
+    } else {
+        return true; // 360极速
+      }
   } // 修正360浏览器
 
 
   function revise360(item) {
     var is360 = false;
 
-    if (window.chrome) {
+    if (item.os === 'Windows') {
       var _chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'));
 
-      if (_chromeVision > 36 && window.showModalDialog) {
-        is360 = true;
-      } else if (_chromeVision > 45) {
-        is360 = mime('type', 'application/vnd.chromium.remoting-viewer');
-      }
+      is360 = _chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer');
+    } else if (item.os === 'Mac OS') {
+      is360 = is360ByUserActivationProperty();
     }
 
-    if (item.device !== 'Mobile' && is360) {
+    if (is360) {
       if (mime('type', 'application/gameplugin')) {
         item.browser = '360安全浏览器';
       } else {
@@ -299,23 +286,17 @@
       var screenTop = window.screenTop - window.screenY;
 
       switch (screenTop) {
-        case 71: // 无收藏栏,贴边
+        case 73: // 无收藏栏
 
-        case 74: // 无收藏栏,非贴边
-
-        case 99: // 有收藏栏,贴边
-
-        case 102:
-          // 有收藏栏,非贴边
+        case 96:
+          // 有收藏栏
           item.browser = '360极速浏览器';
           break;
 
-        case 75: // 无收藏栏,贴边
+        case 75: // 无收藏栏
 
-        case 105: // 有收藏栏,贴边
-
-        case 104:
-          // 有收藏栏,非贴边
+        case 105:
+          // 有收藏栏
           item.browser = '360安全浏览器';
           break;
       }
@@ -433,6 +414,15 @@
       return UA.replace(/^.*uc?browser\/([\d.]+).*$/, '$1');
     },
     '猎豹浏览器': function _() {
+      // 猎豹7 增加了lbbrowser后的版本
+      if (/lbbrowser\/[\d+]/.test(UA)) {
+        var lbVision = UA.replace(/^.*lbbrowser\/([\d]+).*$/, '$1');
+        var _edition = {
+          '10': '7.1'
+        };
+        return _edition[lbVision] || '';
+      }
+
       var edition = {
         '21': '4.0',
         '29': '4.5',
@@ -441,7 +431,8 @@
         '42': '5.3',
         '46': '5.9',
         '49': '6.0',
-        '57': '6.5'
+        '57': '6.5',
+        '63': '7.1'
       };
       return chromeVision(edition);
     },
@@ -543,4 +534,4 @@
   return Result;
 
 }));
-/** Fri May 31 2019 00:04:45 GMT+0800 (CST) **/
+/** Fri May 31 2019 12:30:23 GMT+0800 (CST) **/

@@ -32,32 +32,32 @@
   <script src="./ejs.js"></script>
   <script src="../dist/browser.js"></script>
   <script>
-    const template = `<div class="wrapper">
-      <table>
-        <caption><%=navigator.userAgent%></caption>
-        <thead>
-          <tr>
-            <th>浏览器</th>
-            <th>版本</th>
-            <th>操作系统</th>
-            <th>操作系统版本</th>
-            <th>设备</th>
-            <th>内核</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><%=Browser.browser%></td>
-            <td><%=Browser.browserVersion%></td>
-            <td><%=Browser.os%></td>
-            <td><%=Browser.osVersion%></td>
-            <td><%=Browser.device%></td>
-            <td><%=Browser.kernel%></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>`
-    const html = ejs.render(template, Browser)
+    var template = '<div class="wrapper">\
+      <table>\
+        <caption><%=navigator.userAgent%></caption>\
+        <thead>\
+          <tr>\
+            <th>浏览器</th>\
+            <th>版本</th>\
+            <th>操作系统</th>\
+            <th>操作系统版本</th>\
+            <th>设备</th>\
+            <th>内核</th>\
+          </tr>\
+        </thead>\
+        <tbody>\
+          <tr>\
+            <td><%=Browser.browser%></td>\
+            <td><%=Browser.browserVersion%></td>\
+            <td><%=Browser.os%></td>\
+            <td><%=Browser.osVersion%></td>\
+            <td><%=Browser.device%></td>\
+            <td><%=Browser.kernel%></td>\
+          </tr>\
+        </tbody>\
+      </table>\
+    </div>'
+    var html = ejs.render(template, Browser)
     document.writeln(html)
   </script>
 </body>

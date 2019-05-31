@@ -15,17 +15,16 @@ class BasicInfo {
   // 处理结果
   getResult() {
     const result = []
-    for (const agent of this.useAgents) {
+    for (let i = 0, len = this.useAgents.length; i < len; i++) {
       const item = {}
-      UA = agent
+      UA = this.useAgents[i]
       item.device = this.getDevice() // 设备
       item.kernel = this.getKernel() // 内核
       item.os = this.getOS() // 操作系统
       item.browser = this.getBrowser() // 浏览器
+      revise360(item)
       item.osVersion = this.getOsVersion(item) // 操作系统版本
       item.browserVersion = this.getBrowserVersion(item) // 浏览器版本
-
-      revise360(item)
       reviseKernel(item)
       result.push(item)
     }
@@ -127,37 +126,41 @@ function mime(option, value) {
   return false
 }
 
+function is360ByUserActivationProperty() {
+  if (NAV.userActivation) {
+    return false // chrome
+  } else {
+    return true // 360极速
+  }
+}
+
 // 修正360浏览器
 function revise360(item) {
   let is360 = false
-  if (window.chrome) {
+  if (item.os === 'Windows') {
     const chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'))
-    if (chromeVision > 36 && window.showModalDialog) {
-      is360 = true
-    } else if (chromeVision > 45) {
-      is360 = mime('type', 'application/vnd.chromium.remoting-viewer')
-    }
+    is360 = chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer')
+  } else if (item.os === 'Mac OS') {
+    is360 = is360ByUserActivationProperty()
   }
 
-  if (item.device !== 'Mobile' && is360) {
+  if (is360) {
     if (mime('type', 'application/gameplugin')) {
       item.browser = '360安全浏览器'
     } else {
       item.browser = '360极速浏览器'
     }
   }
+
   if (item.browser === 'IE' || item.browser === 'Edge') {
     const screenTop = window.screenTop - window.screenY
     switch (screenTop) {
-      case 71: // 无收藏栏,贴边
-      case 74: // 无收藏栏,非贴边
-      case 99: // 有收藏栏,贴边
-      case 102: // 有收藏栏,非贴边
+      case 73: // 无收藏栏
+      case 96: // 有收藏栏
         item.browser = '360极速浏览器'
         break
-      case 75: // 无收藏栏,贴边
-      case 105: // 有收藏栏,贴边
-      case 104: // 有收藏栏,非贴边
+      case 75: // 无收藏栏
+      case 105: // 有收藏栏
         item.browser = '360安全浏览器'
         break
     }
@@ -280,6 +283,14 @@ const browserVersion = {
     return UA.replace(/^.*uc?browser\/([\d.]+).*$/, '$1')
   },
   '猎豹浏览器'() {
+    // 猎豹7 增加了lbbrowser后的版本
+    if (/lbbrowser\/[\d+]/.test(UA)) {
+      const lbVision = UA.replace(/^.*lbbrowser\/([\d]+).*$/, '$1')
+      const edition = {
+        '10': '7.1'
+      }
+      return edition[lbVision] || ''
+    }
     const edition = {
       '21': '4.0',
       '29': '4.5',
@@ -288,7 +299,8 @@ const browserVersion = {
       '42': '5.3',
       '46': '5.9',
       '49': '6.0',
-      '57': '6.5'
+      '57': '6.5',
+      '63': '7.1'
     }
     return chromeVision(edition)
   },
