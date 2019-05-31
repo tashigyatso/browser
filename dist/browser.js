@@ -252,7 +252,8 @@
     }
 
     return false;
-  }
+  } // mac 360极速
+
 
   function is360ByUserActivationProperty() {
     if (NAV.userActivation) {
@@ -267,9 +268,14 @@
     var is360 = false;
 
     if (item.os === 'Windows') {
-      var _chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'));
+      var _chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1')); // 2345浏览器9.7版本会被误判为360极速
 
-      is360 = _chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer');
+
+      var is2345 = UA.indexOf('2345explorer') > -1;
+
+      if (_chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer') && !is2345) {
+        is360 = true;
+      }
     } else if (item.os === 'Mac OS') {
       is360 = is360ByUserActivationProperty();
     }
@@ -319,7 +325,7 @@
 
   var osVersion = {
     'Windows': function Windows() {
-      var version = UA.replace(/^.*windows nt ([\d.]+);.*$/, '$1');
+      var version = parseFloat(UA.replace(/^.*windows nt ([\d.]+).*$/, '$1'));
       var edition = {
         '5.0': '2000',
         '5.1': 'XP',
@@ -534,4 +540,4 @@
   return Result;
 
 }));
-/** Fri May 31 2019 12:30:23 GMT+0800 (CST) **/
+/** Fri May 31 2019 16:21:22 GMT+0800 (CST) **/

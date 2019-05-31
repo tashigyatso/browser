@@ -126,6 +126,7 @@ function mime(option, value) {
   return false
 }
 
+// mac 360极速
 function is360ByUserActivationProperty() {
   if (NAV.userActivation) {
     return false // chrome
@@ -139,7 +140,11 @@ function revise360(item) {
   let is360 = false
   if (item.os === 'Windows') {
     const chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'))
-    is360 = chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer')
+    // 2345浏览器9.7版本会被误判为360极速
+    const is2345 = UA.indexOf('2345explorer') > -1
+    if (chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer') && !is2345) {
+      is360 = true
+    }
   } else if (item.os === 'Mac OS') {
     is360 = is360ByUserActivationProperty()
   }
@@ -187,7 +192,7 @@ function chromeVision(edition) {
 // 系统版本信息
 const osVersion = {
   'Windows'() {
-    const version = UA.replace(/^.*windows nt ([\d.]+);.*$/, '$1')
+    const version = parseFloat(UA.replace(/^.*windows nt ([\d.]+).*$/, '$1'))
     const edition = {
       '5.0': '2000',
       '5.1': 'XP',
