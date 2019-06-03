@@ -1,5 +1,5 @@
 /*!
- * browser.js v0.2.0
+ * browser.js v1.0.0
  * (c) 2019-2019 Sorens
  * Released under the MIT License.
  */
@@ -527,17 +527,11 @@
       return UA.replace(/^.*epiphany\/([\d.]+).*$/, '$1');
     }
   };
-  var basicInfo = new BasicInfo(NAV.userAgent.toLowerCase()); // the test
-  // const basicInfo = new BasicInfo([NAV.userAgent.toLowerCase(),
-  //   'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.15'.toLowerCase(),
-  //   'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17 SE 2.X MetaSr 1.0'.toLowerCase()
-  // ])
-  // result = basicInfo.getResult()[2]
-
+  var basicInfo = new BasicInfo(NAV.userAgent.toLowerCase());
   var Result = basicInfo.getResult()[0];
   window.Browser = Result;
 
   return Result;
 
 }));
-/** Fri May 31 2019 16:21:22 GMT+0800 (CST) **/
+/** Mon Jun 03 2019 16:35:40 GMT+0800 (CST) **/
