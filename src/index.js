@@ -396,16 +396,9 @@ const browserVersion = {
 }
 
 const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
-// the test
-// const basicInfo = new BasicInfo([NAV.userAgent.toLowerCase(),
-//   'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.15'.toLowerCase(),
-//   'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17 SE 2.X MetaSr 1.0'.toLowerCase()
-// ])
-// result = basicInfo.getResult()[2]
 
 const Result = basicInfo.getResult()[0]
 
 window.Browser = Result
 
 export default Result
-
