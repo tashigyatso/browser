@@ -1,5 +1,5 @@
 /*!
- * browser.js v0.1.0
+ * browser.js v0.2.0
  * (c) 2019-2019 Sorens
  * Released under the MIT License.
  */
@@ -35,35 +35,107 @@
 
   var createClass = _createClass;
 
-  var NAV = window.navigator;
-  var UA = NAV.userAgent.toLowerCase(); // 检测结果
+  var OSSys = ['Windows', 'Linux', 'Android', 'Windows Phone', 'Ubuntu', 'FreeBSD', 'Debian', 'BlackBerry', 'MeeGo', 'Symbian']; // 修正配置
 
-  var result = {
-    browser: '',
-    // 浏览器
-    browserVersion: '',
-    // 浏览器版本
-    os: '',
-    // 操作系统
-    osVersion: '',
-    // 操作系统版本
-    kernel: '',
-    // 内核
-    device: '' // 设备
-    // 基本信息
-
+  var OSSysRevise = {
+    'x11': 'Linux',
+    'macintosh': 'Mac OS',
+    'adr': 'Android',
+    'like mac os x': 'iOS',
+    'iemobile': 'Windows Phone',
+    'rim': 'BlackBerry',
+    'cros': 'Chrome OS',
+    'hpwos': 'WebOS'
   };
+
+  // 由于有些浏览器是给予IE或者chrome内核的 我们尽量把这两个关键字放到最下边
+  // 使得浏览器自身的关键字优先级高 优先匹配
+  // 例如在mac系统下Chrome浏览器信息也带有Safari字段 ， 需要将Safari优先级低于chrome
+  var Browsers = ['Arora', 'Edge', 'Epiphany', 'Firefox', 'Iceape', 'Iceweasel', 'Kindle', 'Konqueror', 'Lunascape', 'Opera', 'QupZilla', 'SeaMonkey', 'Vivaldi', 'Chrome', 'Chromium', 'Safari'];
+  var BrowsersRevise = {
+    'fxios': 'Firefox',
+    'focus': 'Firefox Focus',
+    'opr': 'Opera',
+    'qihoobrowser': '360浏览器(手机版)',
+    'qhbrowser': '360浏览器(手机版)',
+    '360se': '360安全浏览器',
+    '360ee': '360极速浏览器',
+    'sogou': '搜狗浏览器',
+    'metasr': '搜狗浏览器',
+    'qq/': 'QQ客户端',
+    'qqbrowser': 'QQ浏览器',
+    'uc': 'UC浏览器',
+    'ubrowser': 'UC浏览器',
+    'lbbrowser': '猎豹浏览器',
+    'theworld': '世界之窗浏览器',
+    'baidu': '百度浏览器',
+    'bidubrowser': '百度浏览器',
+    '2345explorer': '2345浏览器',
+    'maxthon': '傲游浏览器',
+    'quark': '夸克浏览器',
+    'miuibrowser': '小米浏览器',
+    'qiyu': '旗鱼浏览器',
+    'taobrowser': '淘宝浏览器',
+    'aliapp(tb': '淘宝手机客户端',
+    'aliapp(tm': '天猫手机客户端',
+    'aliapp(ap': '支付宝手机客户端',
+    'micromessenger': '微信手机客户端',
+    'weibo': '微博手机客户端',
+    'com.douban.frodo': '豆瓣手机客户端',
+    'snebuy-app': '苏宁易购手机客户端',
+    'iqiyiapp': '爱奇艺手机客户端',
+    'silk/': 'Kindle',
+    'yabrowser': 'Yandex',
+    'crios': 'Chrome',
+    'trident': 'IE',
+    'msie': 'IE'
+  };
+
+  var NAV = window.navigator; // 按照惯例大写表示常量， 可这里我们希望UA可以实时更新
+
+  var UA = ''; // 基本信息
 
   var BasicInfo =
   /*#__PURE__*/
   function () {
-    function BasicInfo() {
+    // 参数可以是字符串或者数组
+    function BasicInfo(useAgent) {
       classCallCheck(this, BasicInfo);
-    }
+
+      this.useAgents = typeof useAgent === 'string' ? [useAgent] : useAgent;
+    } // 处理结果
+
 
     createClass(BasicInfo, [{
+      key: "getResult",
+      value: function getResult() {
+        var result = [];
+
+        for (var i = 0, len = this.useAgents.length; i < len; i++) {
+          var item = {};
+          UA = this.useAgents[i];
+          item.device = this.getDevice(); // 设备
+
+          item.kernel = this.getKernel(); // 内核
+
+          item.os = this.getOS(); // 操作系统
+
+          item.browser = this.getBrowser(); // 浏览器
+
+          revise360(item);
+          item.osVersion = this.getOsVersion(item); // 操作系统版本
+
+          item.browserVersion = this.getBrowserVersion(item); // 浏览器版本
+
+          reviseKernel(item);
+          result.push(item);
+        }
+
+        return result;
+      } // 获取设备信息
+
+    }, {
       key: "getDevice",
-      // 获取设备信息
       value: function getDevice() {
         var device;
 
@@ -101,35 +173,26 @@
       value: function getOS() {
         var os;
 
-        if (UA.indexOf('windows') > -1) {
-          os = 'Windows';
-        } else if (UA.indexOf('linux') > -1 || UA.indexOf('x11') > -1) {
-          os = 'Linux';
-        } else if (UA.indexOf('macintosh') > -1) {
-          os = 'Mac OS';
-        } else if (UA.indexOf('android') > -1 || UA.indexOf('adr') > -1) {
-          os = 'Android';
-        } else if (UA.indexOf('like mac os x') > -1) {
-          os = 'iOS';
-        } else if (UA.indexOf('iemobile') > -1 || UA.indexOf('windows phone') > -1) {
-          os = 'Windows Phone';
-        } else if (UA.indexOf('ubuntu') > -1) {
-          os = 'Ubuntu';
-        } else if (UA.indexOf('freebsd') > -1) {
-          os = 'FreeBSD';
-        } else if (UA.indexOf('debian') > -1) {
-          os = 'Debian';
-        } else if (UA.indexOf('blackberry') > -1 || UA.indexOf('rim') > -1) {
-          os = 'BlackBerry';
-        } else if (UA.indexOf('meego') > -1) {
-          os = 'MeeGo';
-        } else if (UA.indexOf('symbian') > -1) {
-          os = 'Symbian';
-        } else if (UA.indexOf('cros') > -1) {
-          os = 'Chrome OS';
-        } else if (UA.indexOf('hpwos') > -1) {
-          os = 'WebOS';
+        for (var i = 0, len = OSSys.length; i < len; i++) {
+          var item = OSSys[i];
+
+          if (~UA.indexOf(OSSys[i].toLowerCase())) {
+            os = item;
+            break;
+          }
         }
+
+        if (!os) {
+          for (var key in OSSysRevise) {
+            var _item = OSSysRevise[key];
+
+            if (~UA.indexOf(key)) {
+              os = _item;
+              break;
+            }
+          }
+        } // 针对windows phone可二次修正
+
 
         return os;
       } // 获取浏览器信息
@@ -139,110 +202,45 @@
       value: function getBrowser() {
         var browser;
 
-        if (UA.indexOf('chrome') > -1 || UA.indexOf('crios') > -1) {
-          browser = 'Chrome';
-        } else if (UA.indexOf('chromium') > -1) {
-          browser = 'Chromium';
-        } else if (UA.indexOf('msie') > -1 || UA.indexOf('trident') > -1) {
-          browser = 'IE';
-        } else if (UA.indexOf('firefox') > -1 || UA.indexOf('fxios') > -1) {
-          browser = 'Firefox';
-        } else if (UA.indexOf('focus') > -1) {
-          browser = 'Firefox Focus';
-        } else if (UA.indexOf('safari') > -1) {
-          browser = 'Safari';
-        } else if (UA.indexOf('opera') > -1 || UA.indexOf('opr') > -1) {
-          browser = 'Opera';
+        for (var i = 0, len = Browsers.length; i < len; i++) {
+          var item = Browsers[i];
+
+          if (~UA.indexOf(Browsers[i].toLowerCase())) {
+            browser = item;
+            break;
+          }
         }
 
-        if (UA.indexOf('edge') > -1) {
-          browser = 'Edge';
-        } else if (UA.indexOf('qihoobrowser') > -1 || UA.indexOf('qhbrowser') > -1) {
-          browser = '360浏览器(手机版)';
-        } else if (UA.indexOf('360se') > -1) {
-          browser = '360安全浏览器';
-        } else if (UA.indexOf('360ee') > -1) {
-          browser = '360极速浏览器';
-        } else if (UA.indexOf('sogou') > -1 || UA.indexOf('metasr') > -1) {
-          browser = '搜狗浏览器';
-        } else if (UA.indexOf('qq/') > -1) {
-          browser = 'QQ客户端';
-        } else if (UA.indexOf('qqbrowser') > -1) {
-          browser = 'QQ浏览器';
-        } else if (UA.indexOf('uc') > -1 || UA.indexOf('ubrowser') > -1) {
-          browser = 'UC浏览器';
-        } else if (UA.indexOf('lbbrowser') > -1) {
-          browser = '猎豹浏览器';
-        } else if (UA.indexOf('theworld') > -1) {
-          browser = '世界之窗浏览器';
-        } else if (UA.indexOf('baidu') > -1 || UA.indexOf('bidubrowser') > -1) {
-          browser = '百度浏览器';
-        } else if (UA.indexOf('2345explorer') > -1) {
-          browser = '2345浏览器';
-        } else if (UA.indexOf('maxthon') > -1) {
-          browser = '傲游浏览器';
-        } else if (UA.indexOf('quark') > -1) {
-          browser = '夸克浏览器';
-        } else if (UA.indexOf('miuibrowser') > -1) {
-          browser = '小米浏览器';
-        } else if (UA.indexOf('qiyu') > -1) {
-          browser = '旗鱼浏览器';
-        } else if (UA.indexOf('taobrowser') > -1) {
-          browser = '淘宝浏览器';
-        } else if (UA.indexOf('aliapp(tb') > -1) {
-          browser = '淘宝手机客户端';
-        } else if (UA.indexOf('aliapp(tm') > -1) {
-          browser = '天猫手机客户端';
-        } else if (UA.indexOf('aliapp(ap') > -1) {
-          browser = '支付宝手机客户端';
-        } else if (UA.indexOf('micromessenger') > -1) {
-          browser = '微信手机客户端';
-        } else if (UA.indexOf('weibo') > -1) {
-          browser = '微博手机客户端';
-        } else if (UA.indexOf('com.douban.frodo') > -1) {
-          browser = '豆瓣手机客户端';
-        } else if (UA.indexOf('snebuy-app') > -1) {
-          browser = '苏宁易购手机客户端';
-        } else if (UA.indexOf('iqiyiapp') > -1) {
-          browser = '爱奇艺手机客户端';
-        } else if (UA.indexOf('kindle') > -1 || UA.indexOf('silk/') > -1) {
-          browser = 'Kindle';
-        } else if (UA.indexOf('arora') > -1) {
-          browser = 'Arora';
-        } else if (UA.indexOf('vivaldi') > -1) {
-          browser = 'Vivaldi';
-        } else if (UA.indexOf('yabrowser') > -1) {
-          browser = 'Yandex';
-        } else if (UA.indexOf('lunascape') > -1) {
-          browser = 'Lunascape';
-        } else if (UA.indexOf('qupzilla') > -1) {
-          browser = 'QupZilla';
-        } else if (UA.indexOf('coc_coc_browser') > -1) {
-          browser = 'COCCOC';
-        } else if (UA.indexOf('iceape') > -1) {
-          browser = 'Iceape';
-        } else if (UA.indexOf('iceweasel') > -1) {
-          browser = 'Iceweasel';
-        } else if (UA.indexOf('konqueror') > -1) {
-          browser = 'Konqueror';
-        } else if (UA.indexOf('seamonkey') > -1) {
-          browser = 'SeaMonkey';
-        } else if (UA.indexOf('epiphany') > -1) {
-          browser = 'Epiphany';
+        if (!browser || browser === 'Chrome' || browser === 'Chromium' || browser === 'Safari') {
+          for (var key in BrowsersRevise) {
+            var _item2 = BrowsersRevise[key];
+
+            if (~UA.indexOf(key)) {
+              browser = _item2;
+              break;
+            }
+          }
         }
 
         return browser;
+      } // 操作系统版本
+
+    }, {
+      key: "getOsVersion",
+      value: function getOsVersion(item) {
+        return osVersion[item.os]();
+      } // 浏览器版本
+
+    }, {
+      key: "getBrowserVersion",
+      value: function getBrowserVersion(item) {
+        return browserVersion[item.browser]();
       }
     }]);
 
     return BasicInfo;
-  }();
+  }(); // 检测type
 
-  var basicInfo = new BasicInfo();
-  result.device = basicInfo.getDevice();
-  result.kernel = basicInfo.getKernel();
-  result.os = basicInfo.getOS();
-  result.browser = basicInfo.getBrowser();
 
   function mime(option, value) {
     var mimeTypes = NAV.mimeTypes;
@@ -254,59 +252,80 @@
     }
 
     return false;
-  } // 360浏览器
+  } // mac 360极速
 
 
-  var is360 = false;
-
-  if (window.chrome) {
-    var _chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'));
-
-    if (_chromeVision > 36 && window.showModalDialog) {
-      is360 = true;
-    } else if (_chromeVision > 45) {
-      is360 = mime('type', 'application/vnd.chromium.remoting-viewer');
-    }
-  }
-
-  if (result.device !== 'Mobile' && is360) {
-    if (mime('type', 'application/gameplugin')) {
-      result.browser = '360安全浏览器';
+  function is360ByUserActivationProperty() {
+    if (NAV.userActivation) {
+      return false; // chrome
     } else {
-      result.browser = '360极速浏览器';
+        return true; // 360极速
+      }
+  } // 修正360浏览器
+
+
+  function revise360(item) {
+    var is360 = false;
+
+    if (item.os === 'Windows') {
+      var _chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1')); // 2345浏览器9.7版本会被误判为360极速
+
+
+      var is2345 = UA.indexOf('2345explorer') > -1;
+
+      if (_chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer') && !is2345) {
+        is360 = true;
+      }
+    } else if (item.os === 'Mac OS') {
+      is360 = is360ByUserActivationProperty();
     }
-  }
 
-  if (result.browser === 'IE' || result.browser === 'Edge') {
-    var screenTop = window.screenTop - window.screenY;
-
-    switch (screenTop) {
-      case 71: // 无收藏栏,贴边
-
-      case 74: // 无收藏栏,非贴边
-
-      case 99: // 有收藏栏,贴边
-
-      case 102:
-        // 有收藏栏,非贴边
-        result.browser = '360极速浏览器';
-        break;
-
-      case 75: // 无收藏栏,贴边
-
-      case 105: // 有收藏栏,贴边
-
-      case 104:
-        // 有收藏栏,非贴边
-        result.browser = '360安全浏览器';
-        break;
+    if (is360) {
+      if (mime('type', 'application/gameplugin')) {
+        item.browser = '360安全浏览器';
+      } else {
+        item.browser = '360极速浏览器';
+      }
     }
+
+    if (item.browser === 'IE' || item.browser === 'Edge') {
+      var screenTop = window.screenTop - window.screenY;
+
+      switch (screenTop) {
+        case 73: // 无收藏栏
+
+        case 96:
+          // 有收藏栏
+          item.browser = '360极速浏览器';
+          break;
+
+        case 75: // 无收藏栏
+
+        case 105:
+          // 有收藏栏
+          item.browser = '360安全浏览器';
+          break;
+      }
+    }
+  } // 修正内核
+
+
+  function reviseKernel(item) {
+    if (item.browser === 'Chrome' && parseInt(item.browserVersion) > 27 || item.browser === 'Opera' && parseInt(item.browserVersion) > 12 || item.browser === 'Yandex') {
+      item.kernel = 'Blink';
+    }
+  } // 获取chrome内核版本
+
+
+  function chromeVision(edition) {
+    var chromeVision = UA.replace(/^.*chrome\/([\d]+).*$/, '$1');
+    return edition[chromeVision] || '';
   } // 系统版本信息
 
 
   var osVersion = {
     'Windows': function Windows() {
-      var version = UA.replace(/^.*windows nt ([\d.]+);.*$/, '$1');
+      var version = parseFloat(UA.replace(/^.*windows nt ([\d.]+).*$/, '$1'));
       var edition = {
         '5.0': '2000',
         '5.1': 'XP',
@@ -337,15 +356,7 @@
     'Debian': function Debian() {
       return UA.replace(/^.*debian\/([\d.]+).*$/, '$1');
     }
-  }; // 操作系统版本
-
-  result.osVersion = osVersion[result.os](); // chrome内核版本
-
-  var chromeVision = function chromeVision(edition) {
-    var chromeVision = UA.replace(/^.*chrome\/([\d]+).*$/, '$1');
-    return edition[chromeVision] || '';
   }; // 浏览器版本信息
-
 
   var browserVersion = {
     'Chrome': function Chrome() {
@@ -409,6 +420,15 @@
       return UA.replace(/^.*uc?browser\/([\d.]+).*$/, '$1');
     },
     '猎豹浏览器': function _() {
+      // 猎豹7 增加了lbbrowser后的版本
+      if (/lbbrowser\/[\d+]/.test(UA)) {
+        var lbVision = UA.replace(/^.*lbbrowser\/([\d]+).*$/, '$1');
+        var _edition = {
+          '10': '7.1'
+        };
+        return _edition[lbVision] || '';
+      }
+
       var edition = {
         '21': '4.0',
         '29': '4.5',
@@ -417,7 +437,8 @@
         '42': '5.3',
         '46': '5.9',
         '49': '6.0',
-        '57': '6.5'
+        '57': '6.5',
+        '63': '7.1'
       };
       return chromeVision(edition);
     },
@@ -505,17 +526,18 @@
     'Epiphany': function Epiphany() {
       return UA.replace(/^.*epiphany\/([\d.]+).*$/, '$1');
     }
-  }; // 浏览器版本
+  };
+  var basicInfo = new BasicInfo(NAV.userAgent.toLowerCase()); // the test
+  // const basicInfo = new BasicInfo([NAV.userAgent.toLowerCase(),
+  //   'Opera/9.80 (Windows NT 6.1) Presto/2.12.388 Version/12.15'.toLowerCase(),
+  //   'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.17 (KHTML, like Gecko) Chrome/24.0.1312.57 Safari/537.17 SE 2.X MetaSr 1.0'.toLowerCase()
+  // ])
+  // result = basicInfo.getResult()[2]
 
-  result.browserVersion = browserVersion[result.browser](); // 修正内核
+  var Result = basicInfo.getResult()[0];
+  window.Browser = Result;
 
-  if (result.browser === 'Chrome' && parseInt(result.browserVersion) > 27 || result.browser === 'Opera' && parseInt(result.browserVersion) > 12 || result.browser === 'Yandex') {
-    result.kernel = 'Blink';
-  }
-
-  window.Browser = result;
-
-  return result;
+  return Result;
 
 }));
-/** Wed May 29 2019 14:22:39 GMT+0800 (CST) **/
+/** Fri May 31 2019 16:21:22 GMT+0800 (CST) **/
