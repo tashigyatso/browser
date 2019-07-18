@@ -1,5 +1,5 @@
 /*!
- * browser.js v1.0.0
+ * browser.js v1.1.0
  * (c) 2019-2019 Sorens
  * Released under the MIT License.
  */
@@ -71,9 +71,11 @@
     'baidu': '百度浏览器',
     'bidubrowser': '百度浏览器',
     '2345explorer': '2345浏览器',
+    'mb2345browser': '2345浏览器手机版',
     'maxthon': '傲游浏览器',
     'quark': '夸克浏览器',
     'miuibrowser': '小米浏览器',
+    'build/huawei': '华为浏览器',
     'qiyu': '旗鱼浏览器',
     'taobrowser': '淘宝浏览器',
     'aliapp(tb': '淘宝手机客户端',
@@ -84,6 +86,7 @@
     'com.douban.frodo': '豆瓣手机客户端',
     'snebuy-app': '苏宁易购手机客户端',
     'iqiyiapp': '爱奇艺手机客户端',
+    'dingtalk': '钉钉手机客户端',
     'silk/': 'Kindle',
     'yabrowser': 'Yandex',
     'crios': 'Chrome',
@@ -265,19 +268,26 @@
 
 
   function revise360(item) {
+    var is2345 = false;
     var is360 = false;
 
     if (item.os === 'Windows') {
       var _chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1')); // 2345浏览器9.7版本会被误判为360极速
 
 
-      var is2345 = UA.indexOf('2345explorer') > -1;
-
-      if (_chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer') && !is2345) {
+      if (window.chrome && window.chrome.adblock2345) {
+        is2345 = true;
+      } else if (_chromeVision > 36 && window.showModalDialog) {
         is360 = true;
+      } else if (_chromeVision > 45) {
+        is360 = mime('type', 'application/vnd.chromium.remoting-viewer');
       }
     } else if (item.os === 'Mac OS') {
       is360 = is360ByUserActivationProperty();
+    }
+
+    if (is2345) {
+      item.browser = '2345浏览器';
     }
 
     if (is360) {
@@ -285,26 +295,6 @@
         item.browser = '360安全浏览器';
       } else {
         item.browser = '360极速浏览器';
-      }
-    }
-
-    if (item.browser === 'IE' || item.browser === 'Edge') {
-      var screenTop = window.screenTop - window.screenY;
-
-      switch (screenTop) {
-        case 73: // 无收藏栏
-
-        case 96:
-          // 有收藏栏
-          item.browser = '360极速浏览器';
-          break;
-
-        case 75: // 无收藏栏
-
-        case 105:
-          // 有收藏栏
-          item.browser = '360安全浏览器';
-          break;
       }
     }
   } // 修正内核
@@ -408,7 +398,16 @@
       return chromeVision(edition);
     },
     '搜狗浏览器': function _() {
-      return UA.replace(/^.*se ([\d.x]+).*$/, '$1').replace(/^.*sogoumobilebrowser\/([\d.]+).*$/, '$1');
+      var edition = {
+        '24': '4.1',
+        '28': '4.2',
+        '31': '5.0',
+        '35': '5.1',
+        '38': '5.3',
+        '49': '6.3',
+        '58': '8.5'
+      };
+      return chromeVision(edition);
     },
     'QQ客户端': function QQ() {
       return UA.replace(/^.*qq\/([\d.]+).*$/, '$1');
@@ -449,7 +448,18 @@
       return UA.replace(/^.*bidubrowser[\s\/]([\d.]+).*$/, '$1');
     },
     '2345浏览器': function _() {
-      return UA.replace(/^.*2345explorer\/([\d.]+).*$/, '$1');
+      var edition = {
+        '55': '9.9',
+        '69': '10.0'
+      };
+      return chromeVision(edition) || UA.replace(/^.*2345explorer\/([\d.]+).*$/, '$1');
+    },
+    '2345浏览器手机版': function _() {
+      var edition = {
+        '55': '9.9',
+        '69': '10.0'
+      };
+      return chromeVision(edition) || UA.replace(/^.*mb2345browser\/([\d.]+).*$/, '$1');
     },
     '傲游浏览器': function _() {
       return UA.replace(/^.*maxthon\/([\d.]+).*$/, '$1');
@@ -459,6 +469,9 @@
     },
     '小米浏览器': function _() {
       return UA.replace(/^.*miuibrowser\/([\d.]+).*$/, '$1');
+    },
+    '华为浏览器': function _() {
+      return UA.replace(/^.*version\/([\d.]+).*$/, '$1');
     },
     '旗鱼浏览器': function _() {
       return UA.replace(/^.*qiyu\/([\d.]+).*$/, '$1');
@@ -480,6 +493,9 @@
     },
     '微博手机客户端': function _() {
       return UA.replace(/^.*weibo__([\d.]+).*$/, '$1');
+    },
+    '钉钉手机客户端': function _() {
+      return UA.replace(/^.*dingtalk\/([\d.]+).*$/, '$1');
     },
     '豆瓣手机客户端': function _() {
       return UA.replace(/^.*com.douban.frodo\/([\d.]+).*$/, '$1');
@@ -534,4 +550,4 @@
   return Result;
 
 }));
-/** Mon Jun 03 2019 16:36:35 GMT+0800 (CST) **/
+/** Thu Jul 18 2019 18:07:19 GMT+0800 (GMT+08:00) **/

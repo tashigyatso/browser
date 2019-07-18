@@ -137,16 +137,24 @@ function is360ByUserActivationProperty() {
 
 // 修正360浏览器
 function revise360(item) {
+  let is2345 = false
   let is360 = false
   if (item.os === 'Windows') {
     const chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'))
     // 2345浏览器9.7版本会被误判为360极速
-    const is2345 = UA.indexOf('2345explorer') > -1
-    if (chromeVision > 45 && mime('type', 'application/vnd.chromium.remoting-viewer') && !is2345) {
+    if (window.chrome && window.chrome.adblock2345) {
+      is2345 = true
+    } else if (chromeVision > 36 && window.showModalDialog) {
       is360 = true
+    } else if (chromeVision > 45) {
+      is360 = mime('type', 'application/vnd.chromium.remoting-viewer')
     }
   } else if (item.os === 'Mac OS') {
     is360 = is360ByUserActivationProperty()
+  }
+
+  if (is2345) {
+    item.browser = '2345浏览器'
   }
 
   if (is360) {
@@ -154,20 +162,6 @@ function revise360(item) {
       item.browser = '360安全浏览器'
     } else {
       item.browser = '360极速浏览器'
-    }
-  }
-
-  if (item.browser === 'IE' || item.browser === 'Edge') {
-    const screenTop = window.screenTop - window.screenY
-    switch (screenTop) {
-      case 73: // 无收藏栏
-      case 96: // 有收藏栏
-        item.browser = '360极速浏览器'
-        break
-      case 75: // 无收藏栏
-      case 105: // 有收藏栏
-        item.browser = '360安全浏览器'
-        break
     }
   }
 }
@@ -276,7 +270,16 @@ const browserVersion = {
     return chromeVision(edition)
   },
   '搜狗浏览器'() {
-    return UA.replace(/^.*se ([\d.x]+).*$/, '$1').replace(/^.*sogoumobilebrowser\/([\d.]+).*$/, '$1')
+    const edition = {
+      '24': '4.1',
+      '28': '4.2',
+      '31': '5.0',
+      '35': '5.1',
+      '38': '5.3',
+      '49': '6.3',
+      '58': '8.5'
+    }
+    return chromeVision(edition)
   },
   'QQ客户端'() {
     return UA.replace(/^.*qq\/([\d.]+).*$/, '$1')
@@ -316,7 +319,18 @@ const browserVersion = {
     return UA.replace(/^.*bidubrowser[\s\/]([\d.]+).*$/, '$1')
   },
   '2345浏览器'() {
-    return UA.replace(/^.*2345explorer\/([\d.]+).*$/, '$1')
+    const edition = {
+      '55': '9.9',
+      '69': '10.0'
+    }
+    return chromeVision(edition) || UA.replace(/^.*2345explorer\/([\d.]+).*$/, '$1')
+  },
+  '2345浏览器手机版'() {
+    const edition = {
+      '55': '9.9',
+      '69': '10.0'
+    }
+    return chromeVision(edition) || UA.replace(/^.*mb2345browser\/([\d.]+).*$/, '$1')
   },
   '傲游浏览器'() {
     return UA.replace(/^.*maxthon\/([\d.]+).*$/, '$1')
@@ -326,6 +340,9 @@ const browserVersion = {
   },
   '小米浏览器'() {
     return UA.replace(/^.*miuibrowser\/([\d.]+).*$/, '$1')
+  },
+  '华为浏览器'() {
+    return UA.replace(/^.*version\/([\d.]+).*$/, '$1')
   },
   '旗鱼浏览器'() {
     return UA.replace(/^.*qiyu\/([\d.]+).*$/, '$1')
@@ -347,6 +364,9 @@ const browserVersion = {
   },
   '微博手机客户端'() {
     return UA.replace(/^.*weibo__([\d.]+).*$/, '$1')
+  },
+  '钉钉手机客户端'() {
+    return UA.replace(/^.*dingtalk\/([\d.]+).*$/, '$1')
   },
   '豆瓣手机客户端'() {
     return UA.replace(/^.*com.douban.frodo\/([\d.]+).*$/, '$1')
