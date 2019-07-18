@@ -1,5 +1,5 @@
 /*!
- * browser.js v1.0.0
+ * browser.js v1.1.0
  * (c) 2019-2019 Sorens
  * Released under the MIT License.
  */
@@ -550,4 +550,4 @@
   return Result;
 
 }));
-/** Thu Jul 18 2019 17:26:32 GMT+0800 (GMT+08:00) **/
+/** Thu Jul 18 2019 18:07:19 GMT+0800 (GMT+08:00) **/
