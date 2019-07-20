@@ -32,6 +32,8 @@
   <script src="./ejs.js"></script>
   <script src="../dist/browser.js"></script>
   <script>
+    console.log(Browser)
+    
     var template = '<div class="wrapper">\
       <table>\
         <caption><%=navigator.userAgent%></caption>\
@@ -59,8 +61,6 @@
     </div>'
     var html = ejs.render(template, Browser)
     document.writeln(html)
-
-    console.log(Browser)
   </script>
 </body>
 </html>
