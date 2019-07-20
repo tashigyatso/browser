@@ -1,5 +1,5 @@
 /*!
- * browser.js v1.1.0
+ * browser.js v1.1.1
  * (c) 2019-2019 Sorens
  * Released under the MIT License.
  */
@@ -637,4 +637,4 @@
 	return index;
 
 }));
-/** Sun Jul 21 2019 00:50:24 GMT+0800 (GMT+08:00) **/
+/** Sun Jul 21 2019 00:58:17 GMT+0800 (GMT+08:00) **/
