@@ -1,36 +1,8 @@
-import { OSSys, OSSysRevise } from './os.js'
-import { Browsers, BrowsersRevise } from './browser.js'
+import { UA, revise360, reviseKernel } from './utils.js'
+import { OSSys, OSSysRevise, OsVersion } from './os.js'
+import { Browsers, BrowsersRevise, BrowserVersion } from './browser.js'
 
-const NAV = window.navigator
-// 按照惯例大写表示常量， 可这里我们希望UA可以实时更新
-let UA = ''
-
-// 基本信息
-class BasicInfo {
-  // 参数可以是字符串或者数组
-  constructor(useAgent) {
-    this.useAgents = typeof useAgent === 'string' ? [useAgent] : useAgent
-  }
-
-  // 处理结果
-  getResult() {
-    const result = []
-    for (let i = 0, len = this.useAgents.length; i < len; i++) {
-      const item = {}
-      UA = this.useAgents[i]
-      item.device = this.getDevice() // 设备
-      item.kernel = this.getKernel() // 内核
-      item.os = this.getOS() // 操作系统
-      item.browser = this.getBrowser() // 浏览器
-      revise360(item)
-      item.osVersion = this.getOsVersion(item) // 操作系统版本
-      item.browserVersion = this.getBrowserVersion(item) // 浏览器版本
-      reviseKernel(item)
-      result.push(item)
-    }
-    return result
-  }
-
+class BrowserBasic {
   // 获取设备信息
   getDevice() {
     let device
@@ -106,319 +78,35 @@ class BasicInfo {
 
   // 操作系统版本
   getOsVersion(item) {
-    return osVersion[item.os]()
+    return OsVersion[item.os]()
   }
 
   // 浏览器版本
   getBrowserVersion(item) {
-    return browserVersion[item.browser]()
+    return BrowserVersion[item.browser]()
   }
 }
 
-// 检测type
-function mime(option, value) {
-  const mimeTypes = NAV.mimeTypes
-  for (const mt in mimeTypes) {
-    if (mimeTypes[mt][option] === value) {
-      return true
-    }
-  }
-  return false
-}
+class Browser extends BrowserBasic {
+  // 处理结果
+  getResult() {
+    const result = {}
 
-// mac 360极速
-function is360ByUserActivationProperty() {
-  if (NAV.userActivation) {
-    return false // chrome
-  } else {
-    return true // 360极速
+    result.device = this.getDevice() // 设备
+    result.kernel = this.getKernel() // 内核
+    result.os = this.getOS() // 操作系统
+    result.browser = this.getBrowser() // 浏览器
+    revise360(result)
+    result.osVersion = this.getOsVersion(result) // 操作系统版本
+    result.browserVersion = this.getBrowserVersion(result) // 浏览器版本
+    reviseKernel(result)
+
+    return result
   }
 }
 
-// 修正360浏览器
-function revise360(item) {
-  let is2345 = false
-  let is360 = false
-  if (item.os === 'Windows') {
-    const chromeVision = Number(UA.replace(/^.*chrome\/([\d]+).*$/, '$1'))
-    // 2345浏览器9.7版本会被误判为360极速
-    if (window.chrome && window.chrome.adblock2345) {
-      is2345 = true
-    } else if (chromeVision > 36 && window.showModalDialog) {
-      is360 = true
-    } else if (chromeVision > 45) {
-      is360 = mime('type', 'application/vnd.chromium.remoting-viewer')
-    }
-  } else if (item.os === 'Mac OS') {
-    is360 = is360ByUserActivationProperty()
-  }
+const browser = new Browser()
 
-  if (is2345) {
-    item.browser = '2345浏览器'
-  }
+window.Browser = browser.getResult()
 
-  if (is360) {
-    if (mime('type', 'application/gameplugin')) {
-      item.browser = '360安全浏览器'
-    } else {
-      item.browser = '360极速浏览器'
-    }
-  }
-}
-
-// 修正内核
-function reviseKernel(item) {
-  if (
-    (item.browser === 'Chrome' && parseInt(item.browserVersion) > 27) ||
-    (item.browser === 'Opera' && parseInt(item.browserVersion) > 12) ||
-    (item.browser === 'Yandex')
-  ) {
-    item.kernel = 'Blink'
-  }
-}
-
-// 获取chrome内核版本
-function chromeVision(edition) {
-  const chromeVision = UA.replace(/^.*chrome\/([\d]+).*$/, '$1')
-  return edition[chromeVision] || ''
-}
-
-// 系统版本信息
-const osVersion = {
-  'Windows'() {
-    const version = parseFloat(UA.replace(/^.*windows nt ([\d.]+).*$/, '$1'))
-    const edition = {
-      '5.0': '2000',
-      '5.1': 'XP',
-      '5.2': 'XP',
-      '6.0': 'Vista',
-      '6.1': '7',
-      '6.2': '8',
-      '6.3': '8.1',
-      '6.4': '10'
-    }
-    return edition[version] || version
-  },
-  'Mac OS'() {
-    return UA.replace(/^.*mac os x ([\d_]+).*$/, '$1').replace(/_/g, '.')
-  },
-  'Android'() {
-    return UA.replace(/^.*android ([\d.]+);.*$/, '$1')
-  },
-  'iOS'() {
-    return UA.replace(/^.*os ([\d_]+) like.*$/, '$1').replace(/_/g, '.')
-  },
-  'Windows Phone'() {
-    return UA.replace(/^.*windows phone( os)? ([\d.]+);.*$/, '$2')
-  },
-  'WebOS'() {
-    return UA.replace(/^.*hpwos\/([\d.]+);.*$/, '$1')
-  },
-  'Debian'() {
-    return UA.replace(/^.*debian\/([\d.]+).*$/, '$1')
-  }
-}
-
-// 浏览器版本信息
-const browserVersion = {
-  'Chrome'() {
-    return UA.replace(/^.*chrome\/([\d.]+).*$/, '$1').replace(/^.*crios\/([\d.]+).*$/, '$1')
-  },
-  'Chromium'() {
-    return UA.replace(/^.*chromium\/([\d.]+).*$/, '$1')
-  },
-  'Firefox'() {
-    return UA.replace(/^.*firefox\/([\d.]+).*$/, '$1').replace(/^.*fxios\/([\d.]+).*$/, '$1')
-  },
-  'Firefox Focus'() {
-    return UA.replace(/^.*focus\/([\d.]+).*$/, '$1')
-  },
-  'Safari'() {
-    return UA.replace(/^.*version\/([\d.]+).*$/, '$1')
-  },
-  'Opera'() {
-    return UA.replace(/^.*opera\/([\d.]+).*$/, '$1').replace(/^.*opr\/([\d.]+).*$/, '$1')
-  },
-  'IE'() {
-    return UA.replace(/^.*msie ([\d.]+).*$/, '$1').replace(/^.*rv:([\d.]+).*$/, '$1')
-  },
-  'Edge'() {
-    return UA.replace(/^.*edge\/([\d.]+).*$/, '$1')
-  },
-  '360浏览器(手机版)'() {
-    return UA.replace(/^.*qihoobrowser\/([\d.]+).*$/, '$1')
-  },
-  '360安全浏览器'() {
-    const edition = {
-      '21': '6.3',
-      '31': '7.0',
-      '42': '8.0',
-      '45': '8.1',
-      '55': '9.1',
-      '63': '10.0'
-    }
-    return chromeVision(edition)
-  },
-  '360极速浏览器'() {
-    const edition = {
-      '30': '7.5',
-      '50': '8.7',
-      '55': '9.0',
-      '63': '9.5',
-      '69': '11.0'
-    }
-    return chromeVision(edition)
-  },
-  '搜狗浏览器'() {
-    const edition = {
-      '24': '4.1',
-      '28': '4.2',
-      '31': '5.0',
-      '35': '5.1',
-      '38': '5.3',
-      '49': '6.3',
-      '58': '8.5'
-    }
-    return chromeVision(edition)
-  },
-  'QQ客户端'() {
-    return UA.replace(/^.*qq\/([\d.]+).*$/, '$1')
-  },
-  'QQ浏览器'() {
-    return UA.replace(/^.*qqbrowser\/([\d.]+).*$/, '$1')
-  },
-  'UC浏览器'() {
-    return UA.replace(/^.*uc?browser\/([\d.]+).*$/, '$1')
-  },
-  '猎豹浏览器'() {
-    // 猎豹7 增加了lbbrowser后的版本
-    if (/lbbrowser\/[\d+]/.test(UA)) {
-      const lbVision = UA.replace(/^.*lbbrowser\/([\d]+).*$/, '$1')
-      const edition = {
-        '10': '7.1'
-      }
-      return edition[lbVision] || ''
-    }
-    const edition = {
-      '21': '4.0',
-      '29': '4.5',
-      '34': '5.0',
-      '39': '5.2',
-      '42': '5.3',
-      '46': '5.9',
-      '49': '6.0',
-      '57': '6.5',
-      '63': '7.1'
-    }
-    return chromeVision(edition)
-  },
-  '世界之窗浏览器'() {
-    return UA.replace(/^.*theworld ([\d.]+).*$/, '$1')
-  },
-  '百度浏览器'() {
-    return UA.replace(/^.*bidubrowser[\s\/]([\d.]+).*$/, '$1')
-  },
-  '2345浏览器'() {
-    const edition = {
-      '55': '9.9',
-      '69': '10.0'
-    }
-    return chromeVision(edition) || UA.replace(/^.*2345explorer\/([\d.]+).*$/, '$1')
-  },
-  '2345浏览器手机版'() {
-    const edition = {
-      '55': '9.9',
-      '69': '10.0'
-    }
-    return chromeVision(edition) || UA.replace(/^.*mb2345browser\/([\d.]+).*$/, '$1')
-  },
-  '傲游浏览器'() {
-    return UA.replace(/^.*maxthon\/([\d.]+).*$/, '$1')
-  },
-  '夸克浏览器'() {
-    return UA.replace(/^.*quark\/([\d.]+).*$/, '$1')
-  },
-  '小米浏览器'() {
-    return UA.replace(/^.*miuibrowser\/([\d.]+).*$/, '$1')
-  },
-  '华为浏览器'() {
-    return UA.replace(/^.*version\/([\d.]+).*$/, '$1')
-  },
-  '旗鱼浏览器'() {
-    return UA.replace(/^.*qiyu\/([\d.]+).*$/, '$1')
-  },
-  '淘宝浏览器'() {
-    return UA.replace(/^.*taobrowser\/([\d.]+).*$/, '$1')
-  },
-  '淘宝手机客户端'() {
-    return UA.replace(/^.*aliapp\(tb\/([\d.]+).*$/, '$1')
-  },
-  '天猫手机客户端'() {
-    return UA.replace(/^.*aliapp\(tm\/([\d.]+).*$/, '$1')
-  },
-  '支付宝手机客户端'() {
-    return UA.replace(/^.*aliapp\(ap\/([\d.]+).*$/, '$1')
-  },
-  '微信手机客户端'() {
-    return UA.replace(/^.*micromessenger\/([\d.]+).*$/, '$1')
-  },
-  '微博手机客户端'() {
-    return UA.replace(/^.*weibo__([\d.]+).*$/, '$1')
-  },
-  '钉钉手机客户端'() {
-    return UA.replace(/^.*dingtalk\/([\d.]+).*$/, '$1')
-  },
-  '豆瓣手机客户端'() {
-    return UA.replace(/^.*com.douban.frodo\/([\d.]+).*$/, '$1')
-  },
-  '苏宁易购手机客户端'() {
-    return UA.replace(/^.*snebuy-app([\d.]+).*$/, '$1')
-  },
-  '爱奇艺手机客户端'() {
-    return UA.replace(/^.*iqiyiversion\/([\d.]+).*$/, '$1')
-  },
-  'Kindle'() {
-    return UA.replace(/^.*version\/([\d.]+).*$/, '$1')
-  },
-  'Arora'() {
-    return UA.replace(/^.*arora\/([\d.]+).*$/, '$1')
-  },
-  'Vivaldi'() {
-    return UA.replace(/^.*vivaldi\/([\d.]+).*$/, '$1')
-  },
-  'Yandex'() {
-    return UA.replace(/^.*yabrowser\/([\d.]+).*$/, '$1')
-  },
-  'Lunascape'() {
-    return UA.replace(/^.*lunascape[\/\s]([\d.]+).*$/, '$1')
-  },
-  'QupZilla'() {
-    return UA.replace(/^.*qupzilla[\/\s]([\d.]+).*$/, '$1')
-  },
-  'COCCOC'() {
-    return UA.replace(/^.*coc_coc_browser\/([\d.]+).*$/, '$1')
-  },
-  'Iceweasel'() {
-    return UA.replace(/^.*iceweasel\/([\d.]+).*$/, '$1')
-  },
-  'Konqueror'() {
-    return UA.replace(/^.*konqueror\/([\d.]+).*$/, '$1')
-  },
-  'Iceape'() {
-    return UA.replace(/^.*iceape\/([\d.]+).*$/, '$1')
-  },
-  'SeaMonkey'() {
-    return UA.replace(/^.*seamonkey\/([\d.]+).*$/, '$1')
-  },
-  'Epiphany'() {
-    return UA.replace(/^.*epiphany\/([\d.]+).*$/, '$1')
-  }
-}
-
-const basicInfo = new BasicInfo(NAV.userAgent.toLowerCase())
-
-const Result = basicInfo.getResult()[0]
-
-window.Browser = Result
-
-export default Result
+export default window.Browser
